@@ -13,6 +13,8 @@ Done:
   (DocumentCenter/View/692) is an older version and was not used. The file's own header stays neutral (no HCD mention)
   because the backtest feeds it to the checker as input.
 
+- oc-cities.json: organizers' 34-city file (lanes/2-clear-it/data/oc-cities.json); San Clemente filled, checked 2026-11-07
+
 TODO:
 - [ ] state/gov-code-66310-66342.md: statute text (leginfo.legislature.ca.gov blocks curl; copy from browser)
 - [ ] state/hcd-findings-irvine-2025-03.md (optional, for the scorecard)
