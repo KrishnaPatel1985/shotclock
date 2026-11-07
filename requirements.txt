@@ -1,0 +1,4 @@
+streamlit>=1.40
+anthropic>=0.70
+pydantic>=2
+pypdf>=5
