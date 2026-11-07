@@ -1,4 +1,5 @@
 """Source watcher page: shows how Shotclock's library stays current (Scale)."""
+import re
 import sys
 from pathlib import Path
 
@@ -6,9 +7,23 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "watcher"))
 import source_watcher as sw  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from theme import CSS  # noqa: E402
 
-st.set_page_config(page_title="Shotclock · Source watcher", page_icon="🔄", layout="wide")
-st.title("🔄 Source watcher")
+def ns(text) -> str:
+    """Spell out the section sign, like the main app."""
+    return re.sub(r"§\s*", "Section ", re.sub(r"§§\s*", "Sections ", str(text)))
+
+
+# Status icons for this page (Material icons, matching the main app)
+STATUS_ICON = {"online": ":blue[:material/language:]", "unchanged": ":green[:material/check_circle:]",
+               "changed": ":red[:material/fiber_new:]", "new": ":blue[:material/add_circle:]",
+               "moved": ":orange[:material/redo:]", "unreachable": ":orange[:material/warning:]"}
+
+st.set_page_config(page_title="Shotclock · Source watcher", page_icon=":material/sync:", layout="wide")
+st.markdown(CSS, unsafe_allow_html=True)
+st.page_link("app.py", label="Back to Shotclock", icon=":material/arrow_back:")
+st.title(":material/sync: Source watcher")
 st.markdown(
     "Shotclock only answers from official documents in its library. Laws, HCD letters and city checklists change, "
     "so this bot **re-downloads every official source, fingerprints it, and flags anything that changed, moved or "
@@ -25,8 +40,9 @@ if changelog:
     st.subheader("Change log: real updates caught so far")
     for e in changelog:
         with st.container(border=True):
-            st.markdown(f"**{e['date']} · [{e['source']}]({e['url']})**  \n"
-                        f"🚩 {e['flag']}  \n🔎 **Found:** {e['found']}  \n✅ **Done:** {e['action']}")
+            st.markdown(ns(f"**{e['date']} · [{e['source']}]({e['url']})**  \n"
+                        f":orange[:material/flag:] {e['flag']}  \n:material/search: **Found:** {e['found']}  \n"
+                        f":green[:material/check_circle:] **Done:** {e['action']}"))
 
 st.subheader("Run a check")
 handbook = next((u for s in sw.find_sources() for u in s.urls if "adu-handbook" in u), None)
@@ -54,7 +70,7 @@ st.subheader("Library sources")
 order = {"changed": 0, "unreachable": 1, "moved": 2, "new": 3, "online": 4, "unchanged": 5}
 for c in sorted(checks, key=lambda c: order.get(c["status"], 9)):
     files = ", ".join(f"`{Path(f).name}`" for f in c["files"])
-    line = f"{sw.ICON.get(c['status'], '?')} **{c['status']}** · [{c['url'][:90]}]({c['url']})  \nused by {files}"
+    line = f"{STATUS_ICON.get(c['status'], ':material/help:')} **{c['status']}** · [{c['url'][:90]}]({c['url']})  \nused by {files}"
     if c["note"]:
         line += f"  \n_{c['note']}_"
     if c["status"] == "changed":
@@ -70,13 +86,14 @@ st.caption("Known official documents that aren't in the library yet. Adding a ci
 for w in rep["candidates"]:
     if w["in_library"]:
         continue
-    state = "✅ online, ready to review and add" if w["reachable"] else f"⚠️ not reachable ({w['note']})"
+    state = ":green[:material/check_circle:] online, ready to review and add" if w["reachable"] \
+        else f":orange[:material/warning:] not reachable ({w['note']})"
     st.markdown(f"- **{w['name']}** · [link]({w['url']}) · {state} → `{w['would_go_in']}`")
 
 st.subheader("Freshness")
 st.dataframe(
     [{"file": f["file"], "last verified": f["last_verified"] or "never",
-      "age (days)": f["age_days"], "status": "⚠️ stale" if f["stale"] else "✅ fresh"} for f in rep["freshness"]],
+      "age (days)": f["age_days"], "status": "stale" if f["stale"] else "fresh"} for f in rep["freshness"]],
     hide_index=True, width="stretch")
 
 with st.expander("How this runs in production"):
