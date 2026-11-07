@@ -520,8 +520,9 @@ with hc[1].popover("About & sources", icon=":material/info:", width="stretch"):
         html_block('<div class="sc-label" style="margin:0 0 .5rem">Are our sources still current?</div>')
         a1, a2 = st.columns(2)
         with a1:
-            st.page_link("pages/2_Source_watcher.py", label="Source watcher", icon=":material/sync:")
-        a2.link_button("Open in new tab", "/Source_watcher", icon=":material/open_in_new:", width="stretch")
+            st.page_link("pages/2_Source_watcher.py", label="Source watcher", icon=":material/sync:",
+                         query_params={"run": "1"})  # the page starts the check right away
+        a2.link_button("Open in new tab", "/Source_watcher?run=1", icon=":material/open_in_new:", width="stretch")
     st.markdown("**What is Shotclock?** It checks ADU permit applications and city correction letters against "
                 "California law, so the 60-day fast path becomes the normal path. Built at the Claude Impact Lab "
                 "(UCI × Habitat OC), Lane 02 *Clear it*.")

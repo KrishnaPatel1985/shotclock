@@ -49,7 +49,11 @@ handbook = next((u for s in sw.find_sources() for u in s.urls if "adu-handbook" 
 demo = st.toggle("Demo: pretend HCD just updated the ADU Handbook", value=False,
                  help="Simulates a changed fingerprint for one source. Nothing is downloaded or saved differently.")
 
-if st.button("Check all sources now", type="primary"):
+# Opened from Shotclock's "Source watcher" button (?run=1): start the check right away, once.
+auto = st.query_params.get("run") == "1" and "watch" not in st.session_state
+if auto:
+    st.query_params.pop("run", None)  # a page refresh should not re-run it
+if st.button("Check all sources now", type="primary") or auto:
     with st.spinner("Checking each official source (one request at a time per site)…"):
         st.session_state["watch"] = sw.run(pretend_changed=handbook if demo else None)
 
