@@ -16,5 +16,5 @@ Done:
 - oc-cities.json: organizers' 34-city file (lanes/2-clear-it/data/oc-cities.json); San Clemente filled, checked 2026-11-07
 
 TODO:
-- [ ] state/gov-code-66310-66342.md: statute text (leginfo.legislature.ca.gov blocks curl; copy from browser)
+- state/gov-code-66310-66342.md: full statute text (Chapter 13, as amended through Jan 1, 2026), copied from leginfo 2026-11-07
 - [ ] state/hcd-findings-irvine-2025-03.md (optional, for the scorecard)
