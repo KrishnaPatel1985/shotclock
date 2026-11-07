@@ -221,8 +221,9 @@ def ask_claude(task: str, output_model: type[BaseModel], exclude: tuple[str, ...
         system = [
             {"type": "text", "text": SYSTEM_RULES},
             # Sources are identical across calls -> cache them so repeat checks are fast and cheap.
+            # 1-hour TTL: a demo often idles more than 5 minutes between clicks; a cold cache re-reads ~122k tokens.
             {"type": "text", "text": "LOADED SOURCES:\n\n" + sources_block(exclude),
-             "cache_control": {"type": "ephemeral"}},
+             "cache_control": {"type": "ephemeral", "ttl": "1h"}},
         ]
     # Attempt 1 as requested. If the JSON reply is cut off or malformed (the SDK raises ValidationError while
     # parsing, before we can check stop_reason), retry once with low effort (less thinking, more room for the
@@ -519,12 +520,14 @@ with tab1:
                 st.session_state.pop("fix", None)
                 st.session_state["pre_text"] = text
                 st.session_state.pop("corrected", None)  # keyed text area would keep the old run's text
-                with st.spinner("Checking against state law and city rules… (about a minute)"):
+                with st.spinner("Checking against state law and city rules… (about 30 seconds)"):
                     st.session_state["pre"] = ask_claude(
                         f"City: {city}\n{WHO}\nPre-check this ADU project BEFORE submission. List each relevant "
                         f"requirement as pass / missing (document or info not provided) / problem (conflicts "
                         f"with a rule). Give a concrete fix for each non-pass item.\n\n<project>\n{text}\n</project>",
-                        PrecheckResult)
+                        # Measured on the sample project: low effort ~34 s vs ~81 s at the default (high),
+                        # same core flags. Medium was ~60 s, so low it is.
+                        PrecheckResult, effort="low")
         res = st.session_state.get("pre")
         if not res:
             empty_state("Results appear here", "Each flag says what's wrong, how to fix it, and quotes the law.")
@@ -610,7 +613,7 @@ with tab2:
             else:
                 clock_fact = f"\nShot clock (computed, not by you): {clock.summary()}\n" if clock else ""
                 st.session_state.pop("reply", None)  # keyed text area would keep the old run's text
-                with st.spinner("Checking each request against state law… (about a minute)"):
+                with st.spinner("Checking each request against state law… (about 30 seconds)"):
                     st.session_state["let"] = ask_claude(
                         f"City: {city}\n{WHO}{clock_fact}\nSplit this city comment letter into its individual requests. "
                         f"For each, decide: matches_law (the city may ask this), likely_conflicts (state ADU law "
@@ -619,7 +622,9 @@ with tab2:
                         f"conflicting ones citing the statute, and if the 60-day decision deadline has passed, note "
                         f"that, quote § 66317(a)(3) that the application appears to be deemed approved, and ask the city to confirm the approval in writing. "
                         f"Sign it [Applicant name].\n\n<letter>\n{letter}\n</letter>",
-                        LetterResult)
+                        # Measured on the sample letter: medium effort 18-49 s (typically ~30) vs ~58 s at the
+                        # default (high); same 5-of-8 conflict labels in every run.
+                        LetterResult, effort="medium")
         res2 = st.session_state.get("let")
         if not res2:
             if not clock:
