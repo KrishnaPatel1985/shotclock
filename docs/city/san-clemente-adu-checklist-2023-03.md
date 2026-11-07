@@ -1,6 +1,8 @@
 # City of San Clemente: ADU Submittal Checklist (March 2023)
 
-Source (official): https://san-clemente.org/home/showpublisheddocument/73589/638156829382970000
+Source (official): https://www.sanclemente.gov/DocumentCenter/View/694/ADU-Application-Packet-PDF
+(The city moved from san-clemente.org to sanclemente.gov; the old link, san-clemente.org/home/showpublisheddocument/73589,
+now redirects to a 404. Same March 2023 document, linked from https://www.sanclemente.gov/258/Permits. Link verified 2026-11-07.)
 Checked: 2026-11-07. Extracted summary; verify against the official PDF. The August 2024 Information Packet
 (san-clemente-adu-info-packet-2024-08.md) is newer where they differ.
 

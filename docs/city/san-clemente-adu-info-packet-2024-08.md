@@ -1,6 +1,9 @@
 # City of San Clemente: Accessory Dwelling Unit Information Packet (August 2024)
 
-Source (official): https://san-clemente.org/home/showpublisheddocument/86302/638600032255670000
+Source (official, Aug 2024 version): https://san-clemente.org/home/showpublisheddocument/86302/638600032255670000
+⚠️ That link is dead (checked 2026-11-07): the city moved to sanclemente.gov and the Aug 2024 file is no longer posted.
+The city's current packet is a June 2026 version: https://www.sanclemente.gov/DocumentCenter/View/1295
+(linked as "ADU information packet (PDF)" from https://www.sanclemente.gov/240/Planning-Services). See "June 2026 packet" below.
 Includes Attachment 6: San Clemente Municipal Code § 17.28.270. Checked: 2026-11-07.
 Extracted summary of the city's own rules; verify against the official PDF. Note: HCD's Oct 14, 2025 letter found
 several of these rules conflict with state law (see docs/state/hcd-findings-san-clemente-2025-10.md).
@@ -30,7 +33,8 @@ several of these rules conflict with state law (see docs/state/hcd-findings-san-
 - Architecture (§ 17.28.270 F.7): exterior materials, colors, windows and doors **must match** the primary dwelling; roof slope must match; down-lights only; interior at least 10 ft wide in every direction, 7 ft walls; screening allowed.
 - Driveway: ADU and primary dwelling share the same driveway unless fire authority requires otherwise.
 - Rental term: 30 days or longer (no short-term rentals).
-- Ownership: ADU/JADU may not be sold separately.
+- Ownership: ADU/JADU may not be sold separately. (The ordinance itself, § 17.28.270 E.5, adds "except as otherwise provided in
+  Government Code Section 65852.26", the AB 587 nonprofit-sale section, now § 66341. See san-clemente-muni-code-17-28-270.md.)
 - Owner occupancy: not required for ADUs created Jan 1, 2020 to Jan 1, 2025; JADU requires owner occupancy; **§ 17.28.270 E.7.b: ADUs permitted on or after Jan 1, 2025 are subject to owner occupancy.**
 - Deed restriction recorded before building permit; runs with the land.
 - Review time: "60 days when a complete application is submitted."
@@ -42,3 +46,16 @@ several of these rules conflict with state law (see docs/state/hcd-findings-san-
 - Utility connection fees: not for converted ADUs on single-family lots; required for detached/new-construction ADUs (capped at reasonable cost).
 - ADU permit processing fee set by City Council resolution (no amount in packet).
 - Deed restriction exempt from recording fees (Gov. Code § 27383).
+
+## June 2026 packet (current version on the city site; verbatim quotes)
+Source: https://www.sanclemente.gov/DocumentCenter/View/1295 (PDF created 2026-06-04). Differences from the Aug 2024 summary above:
+- Ownership: "JADUs may not be sold or otherwise conveyed separately from the primary residence. This is conveyed in the deed
+  restriction required prior to building permit issuance."
+- Owner Occupancy: "Not required for ADUs, unless a Junior ADU is on the property, then the owner must live in the primary
+  residence or the Junior ADU." (The Aug 2024 packet said ADUs permitted on or after Jan 1, 2025 are subject to owner occupancy;
+  HCD finding 5 flagged that.)
+- Deed Restriction: "The deed restriction ensures ADUs are rented 30 days or longer, and cannot be sold separately from the
+  primary residence." (No AB 587 / § 66341 exception is mentioned in the packet.)
+- Review Time Limits: "60 days when a complete application is submitted." Tolled if the applicant requests a delay; the City
+  "may wait to act" on an ADU proposed with a new single-family or multifamily residence until it acts on that application.
+
