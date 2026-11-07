@@ -17,7 +17,7 @@ st.markdown(
 
 c1, c2, c3 = st.columns(3)
 c1.metric("Library files", len(sw.find_sources()))
-c2.metric("Re-check", "weekly (scheduled)")
+c2.metric("Re-check", "on demand", help="Today: press the button. Planned: a weekly scheduled run.")
 c3.metric("Stale after", f"{sw.STALE_DAYS} days")
 
 changelog = sw.load_json(Path(sw.__file__).parent / "changelog.json", {"entries": []})["entries"]
