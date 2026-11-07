@@ -26,6 +26,8 @@ h1, h2, h3, h4, [data-testid="stMetricValue"], [data-testid="stMetricLabel"] p{f
 .sc-headline{font-size:1.15rem;font-weight:700;color:var(--ink);margin:.2rem 0 .3rem;}
 .sc-cite{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.75rem;background:var(--surface);
   border:1px solid var(--line);border-radius:6px;padding:2px 8px;color:#374151;margin-top:.3rem;}
+.sc-cite a{color:var(--orange);text-decoration:underline;text-underline-offset:2px;font-family:inherit;}
+.sc-cite a:hover{color:var(--ink);}
 .sc-quote{border-left:3px solid var(--orange);padding:2px 0 2px 12px;color:#374151;font-size:.9rem;margin:.6rem 0 .2rem;font-style:italic;}
 .sc-fix{background:#FFF7F3;border-radius:10px;padding:10px 12px;font-size:.92rem;margin-top:.5rem;}
 .sc-empty{border:1.5px dashed var(--line);border-radius:16px;padding:46px 22px;text-align:center;color:var(--muted);}

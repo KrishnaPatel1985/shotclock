@@ -308,6 +308,43 @@ def clean_output(obj):
     return no_sec(obj) if isinstance(obj, str) else obj
 
 
+# Readable name + official link for each loaded source (shown instead of the raw file path).
+SOURCE_LINKS = {
+    "gov-code-66310-66342.md": ("California Gov. Code §§ 66310–66342 (ADU law)",
+        "https://leginfo.legislature.ca.gov/faces/codes_displayexpandedbranch.xhtml?tocCode=GOV&division=1.&title=7.&part=&chapter=13.&article="),
+    "hcd-adu-handbook.md": ("HCD ADU Handbook",
+        "https://www.hcd.ca.gov/sites/default/files/docs/policy-and-research/adu-handbook-update.pdf"),
+    "hcd-findings-dana-point-2025-08.md": ("HCD Notice of Violation: Dana Point (Aug 2025)",
+        "https://www.hcd.ca.gov/sites/default/files/docs/policy-and-research/ordinance-review-letters/dana-point-adu-nov-081325.pdf"),
+    "hcd-findings-san-clemente-2025-10.md": ("HCD findings: San Clemente (Oct 2025)",
+        "https://www.hcd.ca.gov/sites/default/files/docs/policy-and-research/ordinance-review-letters/san-clemente-adu-findings-101425.pdf"),
+    "hcd-findings-san-clemente-2025-10-fulltext.md": ("HCD findings: San Clemente (Oct 2025)",
+        "https://www.hcd.ca.gov/sites/default/files/docs/policy-and-research/ordinance-review-letters/san-clemente-adu-findings-101425.pdf"),
+    "san-clemente-muni-code-17-28-270-2026.md": ("San Clemente Municipal Code § 17.28.270 (2026)",
+        "https://library.municode.com/ca/san_clemente/codes/code_of_ordinances?nodeId=TIT17ZO_CH17.28SPUS_17.28.270ACDWUN"),
+    "san-clemente-muni-code-17-28-270.md": ("San Clemente Municipal Code § 17.28.270 (Ord. 1742)",
+        "https://www.sanclemente.gov/DocumentCenter/View/694/ADU-Application-Packet-PDF"),
+    "san-clemente-adu-checklist-2023-03.md": ("San Clemente ADU Submittal Checklist",
+        "https://www.sanclemente.gov/DocumentCenter/View/694/ADU-Application-Packet-PDF"),
+    "san-clemente-adu-info-packet-2024-08.md": ("San Clemente ADU Information Packet",
+        "https://www.sanclemente.gov/DocumentCenter/View/1295"),
+}
+
+
+def source_name_url(source: str) -> tuple[str, str | None]:
+    """'state/hcd-adu-handbook.md' (or just the file name) -> (readable name, official URL)."""
+    key = str(source or "").strip().strip("`").split("/")[-1]
+    name, url = SOURCE_LINKS.get(key, (str(source or "").strip(), None))
+    return name, url
+
+
+def source_link_html(source: str) -> str:
+    name, url = source_name_url(source)
+    if not url:
+        return h(name)
+    return f'<a href="{h(url)}" target="_blank" rel="noopener noreferrer">{h(name)}</a>'
+
+
 def plain(text) -> str:
     """Model text for st.markdown: keep $ amounts from rendering as math."""
     return no_sec(text or "").replace("$", "\\$")
@@ -356,7 +393,7 @@ def render_rows(items, title_attr: str, fix_attr: str | None = None):
             if fix:
                 html_block(f'<div class="sc-fix"><b>Fix</b> · {h(fix)}</div>')
             html_block(f'<div class="sc-quote">“{h(it.quote)}”</div>'
-                       f'<span class="sc-cite">{h(it.citation)} · {h(it.source)}</span>')
+                       f'<span class="sc-cite">{h(it.citation)} · {source_link_html(it.source)}</span>')
 
 
 CHECK_SVG = ('<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" '
@@ -417,12 +454,17 @@ def read_upload(f) -> str:
     return text[:MAX_INPUT_CHARS]
 
 
+def _src_md(source: str) -> str:
+    name, url = source_name_url(source)
+    return f"[{name}]({url})" if url else name
+
+
 def report_md(title: str, summary: str, items, title_attr: str, extra: str = "") -> str:
     lines = [f"# {title}", "", summary, ""]
     for it in sorted(items, key=lambda x: ORDER.index(x.status)):
         _, lbl = STATUS_STYLE[it.status]
         lines += [f"## {getattr(it, title_attr)} ({lbl})", it.reason,
-                  f"Source: {it.citation}, {it.source}: \"{it.quote}\"", ""]
+                  f"Source: {it.citation}, {_src_md(it.source)}: \"{it.quote}\"", ""]
     if extra:
         lines += [extra, ""]
     lines += ["---", DISCLAIMER]
