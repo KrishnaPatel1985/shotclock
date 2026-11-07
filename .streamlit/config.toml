@@ -3,3 +3,4 @@ primaryColor = "#E8643A"
 
 [server]
 headless = true
+maxUploadSize = 10

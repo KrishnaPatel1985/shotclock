@@ -1,5 +1,8 @@
 # City of San Clemente: ADU Submittal Checklist (March 2023)
 
+⚠️ SUPERSEDED IN PART: San Clemente amended § 17.28.270 on June 16, 2026 (Ord. No. 1810). Where this checklist differs
+from city/san-clemente-muni-code-17-28-270-2026.md, the 2026 ordinance is the current rule.
+
 Source (official): https://www.sanclemente.gov/DocumentCenter/View/694/ADU-Application-Packet-PDF
 (The city moved from san-clemente.org to sanclemente.gov; the old link, san-clemente.org/home/showpublisheddocument/73589,
 now redirects to a 404. Same March 2023 document, linked from https://www.sanclemente.gov/258/Permits. Link verified 2026-11-07.)

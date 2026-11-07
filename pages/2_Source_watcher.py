@@ -39,7 +39,7 @@ if st.button("Check all sources now", type="primary"):
 
 rep = st.session_state.get("watch")
 if not rep:
-    st.info("Press **Check all sources now**. It takes about 10–20 seconds.")
+    st.info("Press **Check all sources now**. It can take up to a minute.")
     st.stop()
 
 checks = rep["checks"]

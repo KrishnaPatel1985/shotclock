@@ -1,5 +1,8 @@
 # City of San Clemente: Accessory Dwelling Unit Information Packet (August 2024)
 
+⚠️ SUPERSEDED IN PART: San Clemente amended § 17.28.270 on June 16, 2026 (Ord. No. 1810). Where this summary differs
+from city/san-clemente-muni-code-17-28-270-2026.md, the 2026 ordinance is the current rule.
+
 Source (official, Aug 2024 version): https://san-clemente.org/home/showpublisheddocument/86302/638600032255670000
 ⚠️ That link is dead (checked 2026-11-07): the city moved to sanclemente.gov and the Aug 2024 file is no longer posted.
 The city's current packet is a June 2026 version: https://www.sanclemente.gov/DocumentCenter/View/1295
@@ -34,7 +37,7 @@ several of these rules conflict with state law (see docs/state/hcd-findings-san-
 - Driveway: ADU and primary dwelling share the same driveway unless fire authority requires otherwise.
 - Rental term: 30 days or longer (no short-term rentals).
 - Ownership: ADU/JADU may not be sold separately. (The ordinance itself, § 17.28.270 E.5, adds "except as otherwise provided in
-  Government Code Section 65852.26", the AB 587 nonprofit-sale section, now § 66341. See san-clemente-muni-code-17-28-270.md.)
+  Government Code Section 65852.26", the AB 587 nonprofit-sale section, now § 66341. See docs/historical/san-clemente-muni-code-17-28-270.md.)
 - Owner occupancy: not required for ADUs created Jan 1, 2020 to Jan 1, 2025; JADU requires owner occupancy; **§ 17.28.270 E.7.b: ADUs permitted on or after Jan 1, 2025 are subject to owner occupancy.**
 - Deed restriction recorded before building permit; runs with the land.
 - Review time: "60 days when a complete application is submitted."
