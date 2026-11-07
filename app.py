@@ -1,8 +1,8 @@
 """Shotclock: ADU fast-path checker (Claude Impact Lab, Lane 02 "Clear it").
 
-Before you submit: pre-check an ADU project.
-City letter: check a city comment letter against state law, with the 60-day shot clock and a draft reply.
-Backtest: blind review of San Clemente's ordinance vs HCD's 10 findings.
+Application Pre-Check: check an ADU project before submitting.
+City Letter Review: check a city corrections letter against state law, with the 60-day shot clock and a draft reply.
+Accuracy Test: blind review of San Clemente's ordinance vs HCD's 10 findings.
 Every finding must cite a loaded source in docs/. Not legal advice.
 """
 import html
@@ -275,16 +275,13 @@ html, body, .stMarkdown, .stButton button, .stDownloadButton button, textarea, i
 [data-testid="stHeader"]{background:transparent;}
 [data-testid="stToolbar"], [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"]{display:none;}
 .block-container{padding-top:1.4rem;max-width:1180px;}
-.sc-brand{font-family:'JetBrains Mono',monospace;font-weight:800;letter-spacing:.1em;font-size:1.05rem;color:var(--ink);}
-.sc-brand span{color:var(--orange);}
-.sc-hero{margin-top:1.4rem;}
-.sc-hero h1{font-size:2.4rem;font-weight:800;letter-spacing:-.025em;line-height:1.08;margin:0;color:var(--ink);padding:0;}
-.sc-hero p{color:var(--muted);font-size:1.05rem;margin:.5rem 0 0;}
-.sc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:1.3rem 0 1rem;}
-.sc-stat{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:#fff;}
-.sc-num{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1.9rem;color:var(--ink);line-height:1;}
-.sc-num.o{color:var(--orange);}
-.sc-lbl{color:var(--muted);font-size:.82rem;margin-top:7px;line-height:1.35;}
+.sc-logo{display:flex;align-items:center;gap:14px;margin-bottom:1.1rem;}
+[data-testid="stTabs"]{margin-top:.9rem;}
+.sc-logo svg{flex:none;box-shadow:0 6px 16px rgba(232,100,58,.28);border-radius:12px;}
+.sc-word{font-family:'Inter',sans-serif;font-weight:800;font-size:2.3rem;letter-spacing:-.035em;line-height:1;color:var(--ink);}
+.sc-word span{color:var(--orange);}
+.sc-tag{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:6px;}
+[data-testid="stSelectbox"] label p{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;}
 .sc-label{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:.2rem 0 .45rem;}
 .sc-clock{border-radius:18px;padding:22px 24px;background:#111827;color:#fff;margin-bottom:1rem;}
 .sc-clock .big{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:3.1rem;line-height:1;color:var(--orange);}
@@ -324,8 +321,8 @@ html, body, .stMarkdown, .stButton button, .stDownloadButton button, textarea, i
 .sc-why{color:var(--muted);font-size:.85rem;margin-top:8px;}
 .sc-todo{list-style:none;padding-left:0;margin:.2rem 0 1rem;} .sc-todo li{padding:3px 0;color:#374151;}
 .sc-foot{color:#9CA3AF;font-size:.78rem;text-align:center;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);}
-@media (max-width:700px){.sc-stats{grid-template-columns:1fr;}.sc-dots{grid-template-columns:repeat(5,1fr);}
-  .sc-hero h1{font-size:1.75rem;}.sc-clock .big{font-size:2.4rem;}
+@media (max-width:700px){.sc-dots{grid-template-columns:repeat(5,1fr);}
+  .sc-word{font-size:1.8rem;}.sc-clock .big{font-size:2.4rem;}
   .sc-ba{grid-template-columns:1fr;}.sc-arrow{display:none;}}
 </style>
 """
@@ -403,36 +400,36 @@ st.set_page_config(page_title="Shotclock · ADU fast-path checker", page_icon="�
                    initial_sidebar_state="collapsed")
 html_block(CSS)
 
-# Header: brand · city · sources · about
-hc = st.columns([3.6, 2.2, 2, 1.3, 1.1], vertical_alignment="center")
-hc[0].markdown('<div class="sc-brand">⏱ SHOT<span>CLOCK</span></div>', unsafe_allow_html=True)
-applicant = hc[1].selectbox("Who's applying", list(APPLICANTS), label_visibility="collapsed",
-                            help="Tailors the advice. Habitat / nonprofit focuses on the affordable for-sale path.")
-city = hc[2].selectbox("City", CITIES, label_visibility="collapsed")
-WHO = f"Applicant: {APPLICANTS[applicant]}\n"
-with hc[3].popover("Sources", width="stretch"):
+# Header: logo · about & sources, then labeled settings
+LOGO_SVG = (
+    '<svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true">'
+    '<rect width="46" height="46" rx="12" fill="#E8643A"/>'
+    '<rect x="19" y="7" width="8" height="4" rx="1.5" fill="#fff"/>'
+    '<circle cx="23" cy="25" r="12" fill="none" stroke="#fff" stroke-width="3.2"/>'
+    '<path d="M23 25 L23 17.5" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>'
+    '<path d="M23 25 L28.5 28.5" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>'
+    '<circle cx="23" cy="25" r="2" fill="#fff"/></svg>')
+hc = st.columns([5, 1.6], vertical_alignment="center")
+hc[0].markdown(f'<div class="sc-logo">{LOGO_SVG}<div><div class="sc-word">Shot<span>clock</span></div>'
+               '<div class="sc-tag">ADU permit checker · California</div></div></div>', unsafe_allow_html=True)
+with hc[1].popover("About & sources", icon=":material/info:", width="stretch"):
+    st.markdown("**What is Shotclock?** It checks ADU permit applications and city correction letters against "
+                "California law, so the 60-day fast path becomes the normal path. Built at the Claude Impact Lab "
+                "(UCI × Habitat OC), Lane 02 *Clear it*.")
     st.markdown("**Loaded sources.** Every flag quotes one of these.")
     for kind in ("state", "city"):
         for name, text in load_sources(kind):
             st.caption(f"`{kind}/{name}` · {len(text) // 1000}k chars")
     st.caption(f"Model `{MODEL}` · API key {'✅' if get_client() else '❌ missing'} · Python {sys.version.split()[0]}")
-with hc[4].popover("About", width="stretch"):
-    st.markdown("**Shotclock** checks ADU permits against California law, so the 60-day fast path becomes "
-                "the normal path. Built at the Claude Impact Lab (UCI × Habitat OC), Lane 02 *Clear it*.")
     st.caption(DISCLAIMER)
 
-html_block('<div class="sc-hero"><h1>The fast path, made the normal path.</h1>'
-           "<p>Catch your mistakes before you submit, and the city's mistakes after.</p></div>")
-html_block('<div class="sc-stats">'
-           '<div class="sc-stat"><div class="sc-num">4 → <span style="color:#E8643A">2</span></div>'
-           '<div class="sc-lbl">years from land to keys, if the fast path is the normal path</div></div>'
-           '<div class="sc-stat"><div class="sc-num o">$85k</div>'
-           '<div class="sc-lbl">of a $535k home is the cost of waiting (organizers\' estimate)</div></div>'
-           '<div class="sc-stat"><div class="sc-num">10</div>'
-           '<div class="sc-lbl">state-law conflicts HCD found in San Clemente\'s ADU rules (Oct 2025)</div></div>'
-           "</div>")
+sc = st.columns([1, 1, 2])
+applicant = sc[0].selectbox("Who's applying", list(APPLICANTS),
+                            help="Tailors the advice. Habitat / nonprofit focuses on the affordable for-sale path.")
+city = sc[1].selectbox("City", CITIES, help="The city whose rules apply. San Clemente has full city sources loaded.")
+WHO = f"Applicant: {APPLICANTS[applicant]}\n"
 
-tab1, tab2, tab3 = st.tabs(["Before you submit", "City letter", "Backtest"])
+tab1, tab2, tab3 = st.tabs(["Application Pre-Check", "City Letter Review", "Accuracy Test"])
 
 # ----- Tab 1: pre-check -----
 with tab1:
