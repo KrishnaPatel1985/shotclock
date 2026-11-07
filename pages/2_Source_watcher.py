@@ -24,25 +24,31 @@ st.set_page_config(page_title="Shotclock · Source watcher", page_icon=":materia
 st.markdown(CSS, unsafe_allow_html=True)
 st.page_link("app.py", label="Back to Shotclock", icon=":material/arrow_back:")
 st.title(":material/sync: Source watcher")
-st.markdown(
-    "Shotclock only answers from official documents in its library. Laws, HCD letters and city checklists change, "
-    "so this bot **re-downloads every official source, fingerprints it, and flags anything that changed, moved or "
-    "disappeared**. It never edits the library itself: a person reviews each change and approves it, because this "
-    "is legal information.")
+st.caption("Re-downloads every official source in Shotclock's library and flags anything that changed, moved or "
+           "disappeared. A person reviews each change before the library is updated.")
 
-c1, c2, c3 = st.columns(3)
-c1.metric("Library files", len(sw.find_sources()))
-c2.metric("Re-check", "on demand", help="Today: press the button. Planned: a weekly scheduled run.")
-c3.metric("Stale after", f"{sw.STALE_DAYS} days")
 
-changelog = sw.load_json(Path(sw.__file__).parent / "changelog.json", {"entries": []})["entries"]
-if changelog:
-    st.subheader("Change log: real updates caught so far")
-    for e in changelog:
-        with st.container(border=True):
-            st.markdown(ns(f"**{e['date']} · [{e['source']}]({e['url']})**  \n"
-                        f":orange[:material/flag:] {e['flag']}  \n:material/search: **Found:** {e['found']}  \n"
-                        f":green[:material/check_circle:] **Done:** {e['action']}"))
+def about_section():
+    """Background info, kept out of the way: shown collapsed at the bottom of the page."""
+    with st.expander("How the watcher works & change log", icon=":material/info:"):
+        st.markdown(
+            "Shotclock only answers from official documents in its library. Laws, HCD letters and city checklists "
+            "change, so this bot **re-downloads every official source, fingerprints it, and flags anything that "
+            "changed, moved or disappeared**. It never edits the library itself: a person reviews each change and "
+            "approves it, because this is legal information.")
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Library files", len(sw.find_sources()))
+        c2.metric("Re-check", "on demand", help="Today: press the button. Planned: a weekly scheduled run.")
+        c3.metric("Stale after", f"{sw.STALE_DAYS} days")
+        changelog = sw.load_json(Path(sw.__file__).parent / "changelog.json", {"entries": []})["entries"]
+        if changelog:
+            st.markdown("**Change log: real updates caught so far**")
+            for e in changelog:
+                with st.container(border=True):
+                    st.markdown(ns(f"**{e['date']} · [{e['source']}]({e['url']})**  \n"
+                                f":orange[:material/flag:] {e['flag']}  \n:material/search: **Found:** {e['found']}  \n"
+                                f":green[:material/check_circle:] **Done:** {e['action']}"))
+
 
 st.subheader("Run a check")
 handbook = next((u for s in sw.find_sources() for u in s.urls if "adu-handbook" in u), None)
@@ -60,6 +66,7 @@ if st.button("Check all sources now", type="primary") or auto:
 rep = st.session_state.get("watch")
 if not rep:
     st.info("Press **Check all sources now**. It can take up to a minute.")
+    about_section()
     st.stop()
 
 checks = rep["checks"]
@@ -99,6 +106,8 @@ st.dataframe(
     [{"file": f["file"], "last verified": f["last_verified"] or "never",
       "age (days)": f["age_days"], "status": "stale" if f["stale"] else "fresh"} for f in rep["freshness"]],
     hide_index=True, width="stretch")
+
+about_section()
 
 with st.expander("How this runs in production"):
     st.markdown(
