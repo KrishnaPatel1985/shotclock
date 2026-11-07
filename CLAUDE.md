@@ -15,7 +15,8 @@ You are helping a small team build **Shotclock**, an ADU fast-path checker, at t
   Each check takes ~40–60 s, so run it before going on stage.
 - ✅ **San Clemente sources loaded:** HCD findings (summary + full official letter text, 10 findings confirmed),
   city ADU checklist (2023) and info packet (2024) summaries in `docs/city/`.
-- ✅ **Fixed:** the app no longer claims "deemed approved" for ordinary ADUs (no loaded source says so).
+- ✅ **"Deemed approved" is now sourced:** the loaded Gov. Code text (§ 66317(a)) says an application not acted on
+  within 60 days "shall be deemed approved", so the shot clock and draft reply may say it, quoting the statute.
 - ❌ **Still missing:** Gov. Code statute text, full text of Muni. Code § 17.28.270 (for the backtest). The two
   san-clemente.org links in `docs/city/` returned 404 to a script; open them in a browser to confirm.
 - 💡 Pitch angle to verify: the city packet says ADUs "may not be sold separately", which conflicts with AB 587
@@ -39,9 +40,8 @@ Dana Point Notice of Violation, which is loaded).
 2. **"Is the city allowed to ask that?" (Tab 2):** paste a city comment letter → each request labeled
    🟢 matches law / 🔴 likely conflicts / 🟡 unclear, with the statute, plus a polite draft reply.
    Includes **the shot clock**: date the application was complete → the city's 60-day decision date
-   (Gov. Code § 66317(a)(3): the city must approve or deny within 60 days; the loaded Handbook states
-   "deemed approved" only for the coastal permit, § 66329(b)(5), so don't claim it for regular ADUs until the
-   statute text is loaded) → "Z days left" or
+   (Gov. Code § 66317(a): the city must approve or deny within 60 days, and if it has not, "the application
+   shall be deemed approved"; statute text loaded in docs/state/gov-code-66310-66342.md) → "Z days left" or
    "Z days overdue". The draft reply cites the clock when it has run out. This is what the name promises.
 
 Pitch line: *"The fast path exists on paper. We make it the normal path: we catch your mistakes before you
