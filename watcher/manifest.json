@@ -1,0 +1,32 @@
+{
+  "https://www.sanclemente.gov/DocumentCenter/View/694/ADU-Application-Packet-PDF": {
+    "sha256": "47abebc23334a9a638270f058f8a9429e366aff1ade2ce096c1c2d4d5ce82da0",
+    "size": 1591464,
+    "last_modified": "Sat, 07 Nov 2026 20:13:01 GMT",
+    "approved": "2026-11-07"
+  },
+  "https://www.sanclemente.gov/DocumentCenter/View/1295": {
+    "sha256": "7defd8d45c44e3e3241dd0250faea942298bc545995b7cb5f37b3fc07529b6d2",
+    "size": 689541,
+    "last_modified": "Sat, 07 Nov 2026 20:13:03 GMT",
+    "approved": "2026-11-07"
+  },
+  "https://www.hcd.ca.gov/sites/default/files/docs/policy-and-research/adu-handbook-update.pdf": {
+    "sha256": "ec499e12c08974d8e25af352539b23afc8c26bc7dd200453bd35796de3188e6a",
+    "size": 1201758,
+    "last_modified": "Wed, 22 Apr 2026 14:31:59 GMT",
+    "approved": "2026-11-07"
+  },
+  "https://www.hcd.ca.gov/sites/default/files/docs/policy-and-research/ordinance-review-letters/dana-point-adu-nov-081325.pdf": {
+    "sha256": "56d88f58f3703fff915283ec72094bc2bdea20f6620f6083dbdf740bb7bfad32",
+    "size": 353398,
+    "last_modified": "Tue, 02 Sep 2025 22:54:20 GMT",
+    "approved": "2026-11-07"
+  },
+  "https://www.hcd.ca.gov/sites/default/files/docs/policy-and-research/ordinance-review-letters/san-clemente-adu-findings-101425.pdf": {
+    "sha256": "674be958228a70552c4c4d9b542ead000e696cb8eef89327fc2883e4128dd966",
+    "size": 154138,
+    "last_modified": "Mon, 10 Nov 2025 18:27:05 GMT",
+    "approved": "2026-11-07"
+  }
+}

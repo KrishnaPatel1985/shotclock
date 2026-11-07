@@ -1,0 +1,15 @@
+{
+  "about": "Official documents the team knows about but has not loaded into docs/ yet. The watcher checks they are still online and flags them for review.",
+  "items": [
+    {
+      "name": "HCD technical assistance letter: City of Irvine ADU ordinance (Mar 2025)",
+      "url": "https://www.hcd.ca.gov/sites/default/files/docs/policy-and-research/ordinance-review-letters/irvine-adu-ta-032725.pdf",
+      "would_go_in": "docs/state/hcd-findings-irvine-2025-03.md"
+    },
+    {
+      "name": "HCD technical assistance letter: County of Orange ADU ordinance (Dec 2025)",
+      "url": "https://www.hcd.ca.gov/sites/default/files/docs/policy-and-research/ordinance-review-letters/orange-county-adu-ta-12052025.pdf",
+      "would_go_in": "docs/state/hcd-findings-county-of-orange-2025-12.md"
+    }
+  ]
+}
