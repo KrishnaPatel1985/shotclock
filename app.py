@@ -24,11 +24,15 @@ DOCS = ROOT / "docs"
 DEMO = ROOT / "demo"
 
 # Backtest: review San Clemente's rules blind, then compare with HCD's 10 real findings.
-ORDINANCE_FILE = DOCS / "city" / "san-clemente-muni-code-17-28-270.md"
+# The backtest input is the version HCD reviewed (Ord. 1742), kept in docs/historical/ so Tabs 1-2 never cite it.
+# San Clemente amended § 17.28.270 on June 16, 2026 (Ord. 1810); that current text lives in docs/city/.
+ORDINANCE_FILE = DOCS / "historical" / "san-clemente-muni-code-17-28-270.md"
+CURRENT_ORDINANCE_FILE = DOCS / "city" / "san-clemente-muni-code-17-28-270-2026.md"
 PACKET_FILE = DOCS / "city" / "san-clemente-adu-info-packet-2024-08.md"
 HCD_SC_SUMMARY = DOCS / "state" / "hcd-findings-san-clemente-2025-10.md"
 BACKTEST_HIDE = ("hcd-findings-san-clemente-2025-10.md", "hcd-findings-san-clemente-2025-10-fulltext.md",
-                 PACKET_FILE.name, ORDINANCE_FILE.name)  # the answer key + the input itself
+                 PACKET_FILE.name, ORDINANCE_FILE.name,  # the answer key + the input itself
+                 CURRENT_ORDINANCE_FILE.name)  # the city's 2026 fix would give the answers away
 BACKTEST_SAVED = ROOT / "backtest" / "last-result.json"
 GRADER_RULES = ("You grade a backtest strictly. A finding counts as caught only if a checker issue names the same "
                 "city rule (or clearly the same requirement) AND the same legal problem. Related but different "

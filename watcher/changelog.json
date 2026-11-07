@@ -1,0 +1,21 @@
+{
+  "about": "Real updates to Shotclock's library: what the watcher flagged, what a person found, and what changed. Newest first.",
+  "entries": [
+    {
+      "date": "2026-11-07",
+      "source": "San Clemente Municipal Code § 17.28.270 (Accessory Dwelling Units)",
+      "url": "https://library.municode.com/ca/san_clemente/codes/code_of_ordinances?nodeId=TIT17ZO_CH17.28SPUS_17.28.270ACDWUN",
+      "flag": "Watcher: the code site blocks automated checks; check it in a browser.",
+      "found": "The city amended § 17.28.270 by Ord. No. 1810 on June 16, 2026, eight months after HCD's Oct 2025 findings letter. Checked against HCD's 10 findings, the new text appears to fix all 10: it cites §§ 66310–66342, allows unit combinations and up to 8 detached ADUs on existing multifamily lots, allows 18 ft near transit, limits owner occupancy and deed restrictions to JADUs, drops the 'sanctioned, posted' car-share condition, guarantees 800 sq ft, drops 'match the primary dwelling', and covers unpermitted units built before 2020. One stale citation remains: the JADU sale clause still cites deleted § 65852.26.",
+      "action": "Added docs/city/san-clemente-muni-code-17-28-270-2026.md as the current rules. Moved the version HCD reviewed to docs/historical/ (backtest input only)."
+    },
+    {
+      "date": "2026-11-07",
+      "source": "San Clemente ADU Information Packet (Aug 2024)",
+      "url": "https://san-clemente.org/home/showpublisheddocument/86302/638600032255670000",
+      "flag": "Watcher: HTTP 404, link is dead.",
+      "found": "The city moved its website from san-clemente.org to sanclemente.gov. The Aug 2024 packet is gone; the current packet is a June 2026 version.",
+      "action": "Linked the June 2026 packet (sanclemente.gov/DocumentCenter/View/1295) and quoted it in the packet file."
+    }
+  ]
+}

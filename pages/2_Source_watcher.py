@@ -20,6 +20,15 @@ c1.metric("Library files", len(sw.find_sources()))
 c2.metric("Re-check", "weekly (scheduled)")
 c3.metric("Stale after", f"{sw.STALE_DAYS} days")
 
+changelog = sw.load_json(Path(sw.__file__).parent / "changelog.json", {"entries": []})["entries"]
+if changelog:
+    st.subheader("Change log: real updates caught so far")
+    for e in changelog:
+        with st.container(border=True):
+            st.markdown(f"**{e['date']} · [{e['source']}]({e['url']})**  \n"
+                        f"🚩 {e['flag']}  \n🔎 **Found:** {e['found']}  \n✅ **Done:** {e['action']}")
+
+st.subheader("Run a check")
 handbook = next((u for s in sw.find_sources() for u in s.urls if "adu-handbook" in u), None)
 demo = st.toggle("Demo: pretend HCD just updated the ADU Handbook", value=False,
                  help="Simulates a changed fingerprint for one source. Nothing is downloaded or saved differently.")
