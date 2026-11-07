@@ -5,11 +5,10 @@ City letter: check a city comment letter against state law, with the 60-day shot
 Backtest: blind review of San Clemente's ordinance vs HCD's 10 findings.
 Every finding must cite a loaded source in docs/. Not legal advice.
 """
-from __future__ import annotations
-
 import html
 import json
 import os
+import sys
 from datetime import date
 from pathlib import Path
 from typing import Literal
@@ -177,6 +176,12 @@ class FindingMatch(BaseModel):
 class BacktestGrade(BaseModel):
     matches: list[FindingMatch]
     extra_issues: list[str] = Field(description="Checker issues that match no HCD finding")
+
+
+# Resolve nested model types explicitly (needed on Python < 3.14 when Streamlit runs the script).
+for _m in (PrecheckItem, PrecheckResult, Correction, CorrectedApplication, LetterItem, LetterResult,
+           BacktestIssue, BacktestResult, FindingMatch, BacktestGrade):
+    _m.model_rebuild(force=True, _types_namespace=globals())
 
 
 def ask_claude(task: str, output_model: type[BaseModel], exclude: tuple[str, ...] = (),
@@ -392,7 +397,7 @@ with hc[3].popover("Sources", width="stretch"):
     for kind in ("state", "city"):
         for name, text in load_sources(kind):
             st.caption(f"`{kind}/{name}` · {len(text) // 1000}k chars")
-    st.caption(f"Model `{MODEL}` · API key {'✅' if get_client() else '❌ missing'}")
+    st.caption(f"Model `{MODEL}` · API key {'✅' if get_client() else '❌ missing'} · Python {sys.version.split()[0]}")
 with hc[4].popover("About", width="stretch"):
     st.markdown("**Shotclock** checks ADU permits against California law, so the 60-day fast path becomes "
                 "the normal path. Built at the Claude Impact Lab (UCI × Habitat OC), Lane 02 *Clear it*.")
