@@ -1,11 +1,13 @@
 """Shotclock: ADU fast-path checker (Claude Impact Lab, Lane 02 "Clear it").
 
-Tab 1: pre-check an ADU project before submitting.
-Tab 2: check a city comment letter against state law, with the 60-day shot clock and a draft reply.
+Before you submit: pre-check an ADU project.
+City letter: check a city comment letter against state law, with the 60-day shot clock and a draft reply.
+Backtest: blind review of San Clemente's ordinance vs HCD's 10 findings.
 Every finding must cite a loaded source in docs/. Not legal advice.
 """
 from __future__ import annotations
 
+import html
 import json
 import os
 from datetime import date
@@ -105,7 +107,7 @@ def get_client() -> anthropic.Anthropic | None:
 
 # ---------- structured outputs ----------
 class PrecheckItem(BaseModel):
-    item: str = Field(description="Short name of the requirement checked")
+    item: str = Field(description="Short title of the requirement, at most 6 words, e.g. 'Site plan' or 'Impact fees'")
     status: Literal["pass", "missing", "problem"]
     reason: str
     fix: str = Field(description="What to do; empty if status is pass")
@@ -120,7 +122,7 @@ class PrecheckResult(BaseModel):
 
 
 class LetterItem(BaseModel):
-    request: str = Field(description="The city's request, paraphrased in one line")
+    request: str = Field(description="Short title of the city's request, at most 8 words, e.g. 'Owner-occupancy covenant'")
     status: Literal["matches_law", "likely_conflicts", "unclear"]
     reason: str
     source: str
@@ -204,22 +206,114 @@ def ask_claude(task: str, output_model: type[BaseModel], exclude: tuple[str, ...
 
 # ---------- UI helpers ----------
 STATUS_STYLE = {
-    "problem": ("❌", "Problem"), "missing": ("⚠️", "Missing"), "pass": ("✅", "Pass"),
+    "problem": ("❌", "Problem"), "missing": ("⚠️", "Missing"), "pass": ("✅", "Passes"),
     "likely_conflicts": ("🔴", "Likely conflicts with state law"),
-    "unclear": ("🟡", "Unclear"), "matches_law": ("🟢", "Matches law"),
+    "unclear": ("🟡", "Unclear: not covered by loaded sources"), "matches_law": ("🟢", "Matches law"),
 }
 ORDER = ["problem", "likely_conflicts", "missing", "unclear", "pass", "matches_law"]
+CITIES = ["San Clemente", "Dana Point", "Irvine", "Santa Ana", "Anaheim", "Other OC city"]
+
+CSS = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap');
+:root{--ink:#111827;--muted:#6B7280;--line:#E7E5E4;--surface:#FAFAF9;--orange:#E8643A;
+      --red:#DC2626;--amber:#D97706;--green:#16A34A;}
+html, body, .stMarkdown, .stButton button, .stDownloadButton button, textarea, input, label, p {
+  font-family:'Inter',system-ui,-apple-system,sans-serif;}
+[data-testid="stHeader"]{background:transparent;}
+[data-testid="stToolbar"], [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"]{display:none;}
+.block-container{padding-top:1.4rem;max-width:1180px;}
+.sc-brand{font-family:'JetBrains Mono',monospace;font-weight:800;letter-spacing:.1em;font-size:1.05rem;color:var(--ink);}
+.sc-brand span{color:var(--orange);}
+.sc-hero{margin-top:1.4rem;}
+.sc-hero h1{font-size:2.4rem;font-weight:800;letter-spacing:-.025em;line-height:1.08;margin:0;color:var(--ink);padding:0;}
+.sc-hero p{color:var(--muted);font-size:1.05rem;margin:.5rem 0 0;}
+.sc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:1.3rem 0 1rem;}
+.sc-stat{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:#fff;}
+.sc-num{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1.9rem;color:var(--ink);line-height:1;}
+.sc-num.o{color:var(--orange);}
+.sc-lbl{color:var(--muted);font-size:.82rem;margin-top:7px;line-height:1.35;}
+.sc-label{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:.2rem 0 .45rem;}
+.sc-clock{border-radius:18px;padding:22px 24px;background:#111827;color:#fff;margin-bottom:1rem;}
+.sc-clock .big{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:3.1rem;line-height:1;color:var(--orange);}
+.sc-clock .big.ok{color:#4ADE80;}
+.sc-clock .sub{color:#E5E7EB;font-size:.95rem;margin-top:8px;}
+.sc-clock .law{color:#9CA3AF;font-size:.78rem;margin-top:10px;font-family:'JetBrains Mono',monospace;}
+.sc-bar{height:8px;border-radius:99px;background:#374151;margin-top:14px;overflow:hidden;}
+.sc-bar>div{height:100%;background:var(--orange);}
+.sc-bar>div.ok{background:#4ADE80;}
+.sc-score{display:flex;gap:10px;margin:.2rem 0 1rem;flex-wrap:wrap;}
+.sc-chip{display:flex;align-items:baseline;gap:8px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:#fff;}
+.sc-chip b{font-family:'JetBrains Mono',monospace;font-size:1.6rem;line-height:1;}
+.sc-chip.r b{color:var(--red);} .sc-chip.a b{color:var(--amber);} .sc-chip.g b{color:var(--green);}
+.sc-chip span{color:var(--muted);font-size:.85rem;}
+.sc-headline{font-size:1.15rem;font-weight:700;color:var(--ink);margin:.2rem 0 .3rem;}
+.sc-cite{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.75rem;background:var(--surface);
+  border:1px solid var(--line);border-radius:6px;padding:2px 8px;color:#374151;margin-top:.3rem;}
+.sc-quote{border-left:3px solid var(--orange);padding:2px 0 2px 12px;color:#374151;font-size:.9rem;margin:.6rem 0 .2rem;font-style:italic;}
+.sc-fix{background:#FFF7F3;border-radius:10px;padding:10px 12px;font-size:.92rem;margin-top:.5rem;}
+.sc-empty{border:1.5px dashed var(--line);border-radius:16px;padding:46px 22px;text-align:center;color:var(--muted);}
+.sc-empty b{display:block;color:var(--ink);font-size:1.05rem;margin-bottom:6px;}
+.sc-dots{display:grid;grid-template-columns:repeat(10,1fr);gap:8px;margin:14px 0 6px;}
+.sc-dot{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.9rem;}
+.sc-dot.y{background:var(--orange);color:#fff;} .sc-dot.n{background:#F3F4F6;color:#9CA3AF;}
+.sc-bignum{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:3.4rem;line-height:1;color:var(--ink);}
+.sc-bignum span{color:var(--orange);}
+[data-testid="stExpander"] details{border-radius:12px;border:1px solid var(--line);background:#fff;}
+[data-testid="stExpander"] summary p{font-weight:600;font-size:.97rem;}
+[data-testid="stTabs"] [role="tab"] p{font-weight:700;font-size:1rem;}
+.sc-foot{color:#9CA3AF;font-size:.78rem;text-align:center;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);}
+@media (max-width:700px){.sc-stats{grid-template-columns:1fr;}.sc-dots{grid-template-columns:repeat(5,1fr);}
+  .sc-hero h1{font-size:1.75rem;}.sc-clock .big{font-size:2.4rem;}}
+</style>
+"""
 
 
-def render_items(items, title_attr: str, extra_attr: str | None = None):
+def h(text) -> str:
+    return html.escape(str(text or ""))
+
+
+def html_block(markup: str):
+    st.markdown(markup, unsafe_allow_html=True)
+
+
+def label(text: str):
+    html_block(f'<div class="sc-label">{h(text)}</div>')
+
+
+def empty_state(title: str, body: str):
+    html_block(f'<div class="sc-empty"><b>{h(title)}</b>{h(body)}</div>')
+
+
+def score_chips(chips: list[tuple[str, int, str]]):
+    html_block('<div class="sc-score">' + "".join(
+        f'<div class="sc-chip {cls}"><b>{n}</b><span>{h(lbl)}</span></div>' for cls, n, lbl in chips) + "</div>")
+
+
+def render_rows(items, title_attr: str, fix_attr: str | None = None):
     for it in sorted(items, key=lambda x: ORDER.index(x.status)):
-        icon, label = STATUS_STYLE[it.status]
-        with st.container(border=True):
-            st.markdown(f"**{icon} {getattr(it, title_attr)}**  \n*{label}*")
+        icon, status_label = STATUS_STYLE[it.status]
+        with st.expander(f"{icon}  {getattr(it, title_attr)}"):
+            label(status_label)
             st.write(it.reason)
-            if extra_attr and getattr(it, extra_attr):
-                st.markdown(f"**Fix:** {getattr(it, extra_attr)}")
-            st.caption(f"📎 {it.citation} · `{it.source}` — “{it.quote}”")
+            fix = getattr(it, fix_attr, "") if fix_attr else ""
+            if fix:
+                html_block(f'<div class="sc-fix"><b>Fix</b> · {h(fix)}</div>')
+            html_block(f'<div class="sc-quote">“{h(it.quote)}”</div>'
+                       f'<span class="sc-cite">{h(it.citation)} · {h(it.source)}</span>')
+
+
+def clock_card(clock):
+    pct = min(100, max(0, round((60 - clock.days_left) / 60 * 100)))
+    if clock.overdue:
+        big, cls, sub = f"−{-clock.days_left} DAYS", "", f"past the 60-day decision deadline ({clock.due_date:%b %d, %Y})"
+    else:
+        big, cls, sub = f"{clock.days_left} DAYS LEFT", "ok", f"until the city must decide ({clock.due_date:%b %d, %Y})"
+    html_block(f'<div class="sc-clock"><div class="sc-label" style="color:#9CA3AF">Shot clock</div>'
+               f'<div class="big {cls}">{big}</div><div class="sub">{h(sub)}</div>'
+               f'<div class="sc-bar"><div class="{cls}" style="width:{pct}%"></div></div>'
+               f'<div class="law">Gov. Code § 66317(a)(3) · complete {clock.complete_date:%b %d} · estimate</div></div>')
 
 
 def read_upload(f) -> str:
@@ -234,8 +328,8 @@ def read_upload(f) -> str:
 def report_md(title: str, summary: str, items, title_attr: str, extra: str = "") -> str:
     lines = [f"# {title}", "", summary, ""]
     for it in sorted(items, key=lambda x: ORDER.index(x.status)):
-        icon, label = STATUS_STYLE[it.status]
-        lines += [f"## {icon} {getattr(it, title_attr)} ({label})", it.reason,
+        icon, lbl = STATUS_STYLE[it.status]
+        lines += [f"## {icon} {getattr(it, title_attr)} ({lbl})", it.reason,
                   f"Source: {it.citation}, {it.source}: \"{it.quote}\"", ""]
     if extra:
         lines += [extra, ""]
@@ -244,108 +338,158 @@ def report_md(title: str, summary: str, items, title_attr: str, extra: str = "")
 
 
 # ---------- page ----------
-st.set_page_config(page_title="Shotclock: ADU fast-path checker", page_icon="⏱️", layout="wide")
-st.title("⏱️ Shotclock")
-st.markdown("**The fast path exists on paper. We make it the normal path:** we catch your mistakes before you "
-            "submit, and the city's mistakes after. *Lane 02: turn 4 years into 2.*")
+st.set_page_config(page_title="Shotclock · ADU fast-path checker", page_icon="⏱️", layout="wide",
+                   initial_sidebar_state="collapsed")
+html_block(CSS)
 
-with st.sidebar:
-    st.header("Setup")
-    city = st.text_input("City", "San Clemente")
-    st.caption(f"Model: `{MODEL}`")
-    st.caption("API key: " + ("✅ loaded" if get_client() else "❌ missing"))
-    st.subheader("Loaded sources")
+# Header: brand · city · sources · about
+hc = st.columns([5, 2.2, 1.3, 1.1], vertical_alignment="center")
+hc[0].markdown('<div class="sc-brand">⏱ SHOT<span>CLOCK</span></div>', unsafe_allow_html=True)
+city = hc[1].selectbox("City", CITIES, label_visibility="collapsed")
+with hc[2].popover("Sources", width="stretch"):
+    st.markdown("**Loaded sources.** Every flag quotes one of these.")
     for kind in ("state", "city"):
-        srcs = load_sources(kind)
-        st.markdown(f"**{kind}/** ({len(srcs)})")
-        for name, text in srcs:
-            st.caption(f"• {name} ({len(text)//1000}k chars)")
-        if not srcs:
-            st.caption("• none yet")
-    st.info(DISCLAIMER)
+        for name, text in load_sources(kind):
+            st.caption(f"`{kind}/{name}` · {len(text) // 1000}k chars")
+    st.caption(f"Model `{MODEL}` · API key {'✅' if get_client() else '❌ missing'}")
+with hc[3].popover("About", width="stretch"):
+    st.markdown("**Shotclock** checks ADU permits against California law, so the 60-day fast path becomes "
+                "the normal path. Built at the Claude Impact Lab (UCI × Habitat OC), Lane 02 *Clear it*.")
+    st.caption(DISCLAIMER)
 
-tab1, tab2 = st.tabs(["① Pre-check my project", "② Is the city allowed to ask that?"])
+html_block('<div class="sc-hero"><h1>The fast path, made the normal path.</h1>'
+           "<p>Catch your mistakes before you submit, and the city's mistakes after.</p></div>")
+html_block('<div class="sc-stats">'
+           '<div class="sc-stat"><div class="sc-num">4 → <span style="color:#E8643A">2</span></div>'
+           '<div class="sc-lbl">years from land to keys, if the fast path is the normal path</div></div>'
+           '<div class="sc-stat"><div class="sc-num o">$85k</div>'
+           '<div class="sc-lbl">of a $535k home is the cost of waiting (organizers\' estimate)</div></div>'
+           '<div class="sc-stat"><div class="sc-num">10</div>'
+           '<div class="sc-lbl">state-law conflicts HCD found in San Clemente\'s ADU rules (Oct 2025)</div></div>'
+           "</div>")
 
-# ----- Tab 1 -----
+tab1, tab2, tab3 = st.tabs(["Before you submit", "City letter", "Backtest"])
+
+# ----- Tab 1: pre-check -----
 with tab1:
-    st.subheader("Check your ADU project before the city sees it")
-    st.caption("Each round of city corrections costs weeks. Fix problems before you submit.")
-    if st.button("Load sample project (fictional)", key="s1"):
-        st.session_state["project"] = (DEMO / "sample-project.md").read_text()
-    project = st.text_area("Describe the ADU project", key="project", height=260,
-                           placeholder="Lot size, existing house, ADU type and size, height, setbacks, "
-                                       "parking, distance to transit, documents you have ready...")
-    up = st.file_uploader("…or upload the application (PDF or text)", type=["pdf", "txt", "md"], key="up1")
-    if st.button("Run pre-check", type="primary", key="run1"):
-        text = (project + "\n\n" + read_upload(up)).strip()
-        if not text:
-            st.warning("Describe the project or upload a file first.")
+    left, right = st.columns([5, 7], gap="large")
+    with left:
+        label("Your ADU project")
+        if st.button("Use sample project", key="s1", icon=":material/description:"):
+            st.session_state["project"] = (DEMO / "sample-project.md").read_text()
+        project = st.text_area("Project", key="project", height=230, label_visibility="collapsed",
+                               placeholder="Lot, existing home, ADU type and size, height, setbacks, parking, "
+                                           "distance to transit, documents ready…")
+        up = st.file_uploader("Or upload the application", type=["pdf", "txt", "md"], key="up1")
+        run1 = st.button("Run pre-check", type="primary", key="run1", width="stretch")
+    with right:
+        if run1:
+            text = (project + "\n\n" + read_upload(up)).strip()
+            if not text:
+                st.warning("Describe the project or upload a file first.")
+            else:
+                with st.spinner("Checking against state law and city rules… (about a minute)"):
+                    st.session_state["pre"] = ask_claude(
+                        f"City: {city}\n\nPre-check this ADU project BEFORE submission. List each relevant "
+                        f"requirement as pass / missing (document or info not provided) / problem (conflicts "
+                        f"with a rule). Give a concrete fix for each non-pass item.\n\n<project>\n{text}\n</project>",
+                        PrecheckResult)
+        res = st.session_state.get("pre")
+        if not res:
+            empty_state("Results appear here", "Each flag says what's wrong, how to fix it, and quotes the law.")
         else:
-            with st.spinner("Checking against state ADU law and city sources…"):
-                st.session_state["pre"] = ask_claude(
-                    f"City: {city}\n\nPre-check this ADU project BEFORE submission. List each relevant "
-                    f"requirement as pass / missing (document or info not provided) / problem (conflicts "
-                    f"with a rule). Give a concrete fix for each non-pass item.\n\n<project>\n{text}\n</project>",
-                    PrecheckResult)
-    res = st.session_state.get("pre")
-    if res:
-        n_bad = sum(i.status != "pass" for i in res.items)
-        (st.error if any(i.status == "problem" for i in res.items) else
-         st.warning if n_bad else st.success)(f"{n_bad} of {len(res.items)} items need attention. {res.summary}")
-        render_items(res.items, "item", "fix")
-        st.download_button("Download report (.md)", report_md("Shotclock pre-check", res.summary, res.items, "item"),
-                           file_name="shotclock-precheck.md")
+            c = {s: sum(i.status == s for i in res.items) for s in ("problem", "missing", "pass")}
+            label("Result")
+            score_chips([("r", c["problem"], "problems"), ("a", c["missing"], "missing"), ("g", c["pass"], "pass")])
+            with st.expander("Summary", icon=":material/notes:"):
+                st.write(res.summary)
+            render_rows(res.items, "item", "fix")
+            st.download_button("Download fix list", report_md("Shotclock pre-check", res.summary, res.items, "item"),
+                               file_name="shotclock-precheck.md", icon=":material/download:")
 
-# ----- Tab 2 -----
+# ----- Tab 2: city letter -----
 with tab2:
-    st.subheader("Paste the city's comment letter")
-    st.caption("Cities sometimes ask for things state law doesn't allow. Each extra round costs weeks.")
-    if st.button("Load sample city letter (fictional)", key="s2"):
-        st.session_state["letter"] = (DEMO / "sample-comment-letter.md").read_text()
-    letter = st.text_area("City comment letter", key="letter", height=260)
-    c1, c2 = st.columns([1, 2])
-    with c1:
-        use_clock = st.checkbox("Start the shot clock", value=True)
-        complete = st.date_input("Date the application was complete", value=date(2026, 8, 1),
-                                 disabled=not use_clock)
+    left, right = st.columns([5, 7], gap="large")
+    with left:
+        label("The city's comment letter")
+        if st.button("Use sample letter", key="s2", icon=":material/mail:"):
+            st.session_state["letter"] = (DEMO / "sample-comment-letter.md").read_text()
+        letter = st.text_area("Letter", key="letter", height=230, label_visibility="collapsed",
+                              placeholder="Paste the corrections letter the city sent you…")
+        d1, d2 = st.columns([3, 2], vertical_alignment="bottom")
+        complete = d1.date_input("Application complete on", value=date(2026, 8, 1))
+        use_clock = d2.toggle("Shot clock", value=True)
+        run2 = st.button("Check the letter", type="primary", key="run2", width="stretch")
     clock = shot_clock(complete) if use_clock else None
-    with c2:
+    with right:
         if clock:
-            (st.error if clock.overdue else st.info)("⏱️ " + clock.summary() + "  \n*Estimate: completeness "
-                                                     "and tolling rules vary.*")
-    if st.button("Check the letter", type="primary", key="run2"):
-        if not letter.strip():
-            st.warning("Paste a letter first.")
+            clock_card(clock)
+        if run2:
+            if not letter.strip():
+                st.warning("Paste a letter first.")
+            else:
+                clock_fact = f"\nShot clock (computed, not by you): {clock.summary()}\n" if clock else ""
+                with st.spinner("Checking each request against state law… (about a minute)"):
+                    st.session_state["let"] = ask_claude(
+                        f"City: {city}\n{clock_fact}\nSplit this city comment letter into its individual requests. "
+                        f"For each, decide: matches_law (the city may ask this), likely_conflicts (state ADU law "
+                        f"appears to prohibit it), or unclear (not covered by loaded sources). Then draft a short, "
+                        f"polite reply from the applicant: agree to the lawful items, ask the city to withdraw the "
+                        f"conflicting ones citing the statute, and if the 60-day decision deadline has passed, note "
+                        f"that and ask the city to approve or deny promptly (do not claim it is deemed approved). "
+                        f"Sign it [Applicant name].\n\n<letter>\n{letter}\n</letter>",
+                        LetterResult)
+        res2 = st.session_state.get("let")
+        if not res2:
+            if not clock:
+                empty_state("Results appear here", "Each request is checked against state law, with a draft reply.")
         else:
-            clock_fact = f"\nShot clock (computed, not by you): {clock.summary()}\n" if clock else ""
-            with st.spinner("Checking each request against state law…"):
-                st.session_state["let"] = ask_claude(
-                    f"City: {city}\n{clock_fact}\nSplit this city comment letter into its individual requests. "
-                    f"For each, decide: matches_law (the city may ask this), likely_conflicts (state ADU law "
-                    f"appears to prohibit it), or unclear (not covered by loaded sources). Then draft a short, "
-                    f"polite reply from the applicant: agree to the lawful items, ask the city to withdraw the "
-                    f"conflicting ones citing the statute, and if the 60-day decision deadline has passed, note "
-                    f"that and ask the city to approve or deny promptly (do not claim it is deemed approved). "
-                    f"Sign it [Applicant name].\n\n<letter>\n{letter}\n</letter>",
-                    LetterResult)
-    res2 = st.session_state.get("let")
-    if res2:
-        n_conf = sum(i.status == "likely_conflicts" for i in res2.items)
-        (st.error if n_conf else st.success)(
-            f"**{n_conf} of {len(res2.items)} requests likely conflict with state law.** {res2.summary}")
-        render_items(res2.items, "request")
-        st.subheader("Draft reply to the city")
-        reply = st.text_area("Edit before sending", res2.draft_reply, height=320, key="reply")
-        st.code(reply, language=None)  # has a built-in copy button
-        st.download_button("Download reply (.md)",
-                           report_md("Shotclock letter check", res2.summary, res2.items, "request",
-                                     "## Draft reply\n\n" + reply), file_name="shotclock-reply.md")
+            c = {s: sum(i.status == s for i in res2.items) for s in ("likely_conflicts", "unclear", "matches_law")}
+            html_block(f'<div class="sc-headline">{c["likely_conflicts"]} of {len(res2.items)} requests likely '
+                       f'conflict with state law</div>')
+            score_chips([("r", c["likely_conflicts"], "conflict"), ("a", c["unclear"], "unclear"),
+                         ("g", c["matches_law"], "lawful")])
+            with st.expander("Summary", icon=":material/notes:"):
+                st.write(res2.summary)
+            render_rows(res2.items, "request")
+            label("Draft reply to the city")
+            reply = st.text_area("Reply", res2.draft_reply, height=300, key="reply", label_visibility="collapsed")
+            b1, b2 = st.columns(2)
+            b1.download_button("Download reply", report_md("Shotclock letter check", res2.summary, res2.items,
+                               "request", "## Draft reply\n\n" + reply), file_name="shotclock-reply.md",
+                               icon=":material/download:", width="stretch")
+            with b2.popover("Copy reply", icon=":material/content_copy:", width="stretch"):
+                st.code(reply, language=None, wrap_lines=True)
 
-    # ----- Backtest -----
-    with st.expander("🧪 Backtest: would Shotclock have caught what the state caught?"):
-        st.markdown("In Oct 2025 HCD found **10 conflicts** between San Clemente's ADU ordinance and state law. "
-                    "Here Shotclock reviews the city's rules **with HCD's San Clemente letter hidden**, then we "
-                    "compare its list with HCD's 10 findings.")
+# ----- Tab 3: backtest -----
+with tab3:
+    if "bt" not in st.session_state and BACKTEST_SAVED.exists():
+        st.session_state["bt"] = json.loads(BACKTEST_SAVED.read_text())
+    html_block('<div class="sc-headline">Would Shotclock have caught what the state caught?</div>')
+    st.caption("HCD found 10 conflicts in San Clemente's ADU ordinance. Shotclock reviews the ordinance with "
+               "HCD's letter hidden, then a strict second pass compares its list with HCD's 10 findings.")
+    bt = st.session_state.get("bt")
+    if bt:
+        matches = sorted(bt["grade"]["matches"], key=lambda m: m["finding_number"])
+        n = sum(m["caught"] for m in matches)
+        c1, c2 = st.columns([1, 3], vertical_alignment="center")
+        c1.markdown(f'<div class="sc-bignum"><span>{n}</span>/{len(matches)}</div>', unsafe_allow_html=True)
+        c2.markdown(f'<div class="sc-dots">' + "".join(
+            f'<div class="sc-dot {"y" if m["caught"] else "n"}" title="{h(m["finding"])}">{m["finding_number"]}</div>'
+            for m in matches) + "</div>", unsafe_allow_html=True)
+        st.caption(f"Input: {bt['input']}. The model may have seen public reports in training, so treat this as a "
+                   "sanity check, not proof.")
+        for m in matches:
+            with st.expander(f"{'✅' if m['caught'] else '⬜'}  HCD #{m['finding_number']} · {m['finding']}"):
+                st.write(f"**Shotclock:** {m['matched_issue']}" if m["caught"] else "Not caught in this run.")
+        if bt["grade"]["extra_issues"]:
+            with st.expander(f"➕  {len(bt['grade']['extra_issues'])} more issues Shotclock flagged (not in HCD's letter)"):
+                for e in bt["grade"]["extra_issues"]:
+                    st.markdown(f"- {e}")
+    else:
+        empty_state("No backtest yet", "Run it below. It takes about two minutes.")
+
+    with st.expander("Run it live", icon=":material/science:"):
         if ORDINANCE_FILE.exists():
             default_input, input_label = ORDINANCE_FILE.read_text(), f"`{ORDINANCE_FILE.name}` (full ordinance)"
         elif PACKET_FILE.exists():
@@ -355,13 +499,9 @@ with tab2:
             input_label = f"`{PACKET_FILE.name}` (city's rule summary; full ordinance text not loaded yet)"
         else:
             default_input, input_label = "", "nothing loaded: paste the ordinance"
-        st.caption(f"Input: {input_label}. Hidden from the checker: " + ", ".join(f"`{h}`" for h in BACKTEST_HIDE))
-        ordinance = st.text_area("City ADU rules to review", default_input, height=200, key="ordinance")
-        b1, b2 = st.columns(2)
-        run_bt = b1.button("Run backtest (~1–2 min)", type="primary", key="run_bt")
-        if BACKTEST_SAVED.exists() and b2.button("Show last saved result", key="show_bt"):
-            st.session_state["bt"] = json.loads(BACKTEST_SAVED.read_text())
-        if run_bt and ordinance.strip():
+        st.caption(f"Input: {input_label}. Hidden from the checker: " + ", ".join(f"`{x}`" for x in BACKTEST_HIDE))
+        ordinance = st.text_area("City ADU rules to review", default_input, height=180, key="ordinance")
+        if st.button("Run backtest (~2 min)", key="run_bt", icon=":material/play_arrow:") and ordinance.strip():
             with st.spinner("Step 1/2: reviewing the city's rules against state law (HCD letter hidden)…"):
                 review = ask_claude(
                     "Review this city ADU ordinance against state ADU law. List every provision that likely "
@@ -380,20 +520,6 @@ with tab2:
                                           "input": input_label}
                 BACKTEST_SAVED.parent.mkdir(exist_ok=True)
                 BACKTEST_SAVED.write_text(json.dumps(st.session_state["bt"], indent=2))
-        bt = st.session_state.get("bt")
-        if bt:
-            matches = bt["grade"]["matches"]
-            n = sum(m["caught"] for m in matches)
-            st.success(f"### Shotclock found {n} of the {len(matches)} issues the state found")
-            st.caption(f"Input: {bt['input']}. HCD's San Clemente letter was hidden from the checker. The model "
-                       "may still have seen public reports in training, so treat this as a sanity check, not proof.")
-            for m in sorted(matches, key=lambda m: m["finding_number"]):
-                st.markdown(f"{'✅' if m['caught'] else '⬜'} **HCD #{m['finding_number']}:** {m['finding']}" +
-                            (f"  \n  ↳ *Shotclock:* {m['matched_issue']}" if m["caught"] else ""))
-            if bt["grade"]["extra_issues"]:
-                st.markdown("**Also flagged by Shotclock (not in HCD's letter):**")
-                for e in bt["grade"]["extra_issues"]:
-                    st.markdown(f"- {e}")
+                st.rerun()
 
-st.divider()
-st.caption("Shotclock · Claude Impact Lab: UCI × Habitat OC · " + DISCLAIMER)
+html_block(f'<div class="sc-foot">Shotclock · Claude Impact Lab: UCI × Habitat OC · {h(DISCLAIMER)}</div>')

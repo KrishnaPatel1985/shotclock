@@ -1,114 +1,102 @@
 {
   "review": {
-    "summary": "The packet appears to conflict with state ADU law (Gov. Code \u00a7\u00a7 66310-66342) in 17 places. The most serious are the owner-occupancy requirement for ADUs, the ADU deed restriction, HOA and coastal approval as prescreen conditions, unit-count limits, and design standards applied to all units. This is a screening against the loaded sources only, not legal advice. Some items depend on whether a unit is a \u00a7 66323 unit, and the coastal item depends on San Clemente's Local Coastal Program, which the loaded sources do not cover.",
+    "summary": "The ordinance likely conflicts with current state ADU law (Gov. Code \u00a7\u00a7 66310-66342) in 16 places. Main problems: it cites repealed \u00a7 65852.2 and related sections, requires owner occupancy and deed restrictions for ADUs, uses the 2018 unpermitted-ADU date, caps multifamily detached ADUs at two, and sets impact-fee, parking, setback, architecture and historic standards that go beyond state limits. It also appears to omit the 15-business-day completeness determination and the appeal process (\u00a7 66317(a)(2), (d)). Items not covered by loaded sources (septic percolation test E.6, shared-driveway rule F.6, ADU permit fee D.2.b) are unclear. This is a screening aid, not legal advice. Check the live code, since the city may have amended it.",
     "issues": [
       {
-        "rule": "\u00a7 17.28.270 E.7.b: ADUs permitted on or after Jan 1, 2025 are subject to owner occupancy.",
-        "conflict": "State law bars owner-occupancy requirements for ADUs. The only exception is an ADU sold to a qualified buyer under \u00a7 66341(c)(3).",
-        "citation": "state/hcd-adu-handbook.md, Owner-Occupancy (Gov. Code \u00a7 66315)",
-        "quote": "a local agency cannot impose an owner-occupancy requirement on any other ADU"
+        "rule": "\u00a7 17.28.270(A) (also D.1.a.iv, E.5, E.8.a, G.2.a.ii): says the section is meant to comply with Gov. Code \u00a7\u00a7 65852.2 and 65852.22 and cites \u00a7 65852.26.",
+        "conflict": "Those sections were renumbered by SB 477 and are no longer current law. The ordinance likely needs to cite and track \u00a7\u00a7 66310-66342, including \u00a7 66342 for optional condominium conveyance.",
+        "citation": "state/hcd-adu-handbook.md, SB 477 / Gov. Code \u00a7\u00a7 66310-66342",
+        "quote": "updated from 65852.2, 65852.22, 65852.23, and 65852.26 to Government Code sections 66310-66342"
       },
       {
-        "rule": "Deed restriction on ADUs recorded before a building permit issues and running with the land (also required as a submittal step).",
-        "conflict": "HCD says a local agency likely cannot impose a deed restriction on an ADU. A JADU deed restriction limited to the JADU-law items is permitted. Fix: apply it to JADUs only.",
-        "citation": "state/hcd-adu-handbook.md, Deed Restrictions (Gov. Code \u00a7 66315)",
+        "rule": "\u00a7 17.28.270(D.1.d): allows 'no more than two detached ADUs' on a lot with an existing or proposed multifamily dwelling.",
+        "conflict": "State law allows up to two on a proposed multifamily dwelling but up to eight on an existing one, not to exceed the number of existing units. The two-unit cap on existing multifamily lots likely conflicts.",
+        "citation": "state/hcd-adu-handbook.md, Gov. Code \u00a7 66323(a)(4)(A)",
+        "quote": "up to eight detached ADUs are allowed on a lot with an existing multifamily dwelling, not to exceed the number of existing units on the lot"
+      },
+      {
+        "rule": "\u00a7 17.28.270(D.4.a.i): no impact fee only for an ADU 'less than 750 square feet in size'; also silent on JADUs.",
+        "conflict": "State law exempts ADUs of 750 square feet of interior livable space or less (and JADUs of 500 or less). The ordinance would allow fees on a unit of exactly 750 square feet and does not state the JADU exemption.",
+        "citation": "state/hcd-adu-handbook.md, Gov. Code \u00a7 66311.5(c)",
+        "quote": "if it contains 750 square feet of interior livable space or less"
+      },
+      {
+        "rule": "\u00a7 17.28.270(D.4.a.ii): impact fees apply to an ADU 'that is 750 square feet or larger'.",
+        "conflict": "State law applies proportional fees only to ADUs larger than 750 square feet of interior livable space. Charging at exactly 750 square feet likely conflicts.",
+        "citation": "state/hcd-adu-handbook.md, Gov. Code \u00a7 66311.5(c)",
+        "quote": "If an ADU contains greater than 750 square feet of interior livable space, impact fees shall be charged proportionately"
+      },
+      {
+        "rule": "\u00a7 17.28.270(E.7.b): ADUs permitted on or after Jan. 1, 2025 are subject to an owner-occupancy requirement.",
+        "conflict": "State law bars owner-occupancy requirements for ADUs, with a narrow exception for certain qualified-buyer sales under \u00a7 66341. The ordinance imposes it generally.",
+        "citation": "state/hcd-adu-handbook.md, Gov. Code \u00a7 66315",
+        "quote": "instead mandates no owner-occupancy requirement for ADUs"
+      },
+      {
+        "rule": "\u00a7 17.28.270(E.7.c): all JADUs are subject to owner occupancy.",
+        "conflict": "State law requires owner occupancy only when the JADU shares sanitation facilities with the primary structure. JADUs with their own bathroom cannot be required to have it.",
+        "citation": "state/hcd-adu-handbook.md, Gov. Code \u00a7 66333(b)",
+        "quote": "If the JADU does not have shared sanitation facilities, owner occupancy will not be required"
+      },
+      {
+        "rule": "\u00a7 17.28.270(E.8): requires a recorded deed restriction (no separate sale, size limits, enforcement, removal process) for every ADU and JADU before building permit issuance.",
+        "conflict": "The Handbook says a local agency cannot impose a deed restriction on an ADU. It allows a JADU deed restriction only for the no-separate-sale and size/attribute terms, so the added enforcement terms for JADUs may also go too far.",
+        "citation": "state/hcd-adu-handbook.md, Gov. Code \u00a7 66315 (ADUs); \u00a7 66333(c) (JADUs)",
         "quote": "A local agency cannot impose a deed restriction on an ADU."
       },
       {
-        "rule": "Ownership: ADU/JADU may not be sold separately.",
-        "conflict": "A blanket ban on separate sale appears to ignore the mandated \u00a7 66341 exception for ADUs built by a qualified nonprofit and sold to a qualified buyer. Fix: add that exception. Separate sale as condominiums under \u00a7 66342 is optional.",
-        "citation": "state/hcd-findings-dana-point-2025-08.md, New Findings 3 (Gov. Code \u00a7 66341)",
-        "quote": "Allowing ADUs to be sold separately if they meet the requirements of Government Code section 66341 is mandated by the statute"
+        "rule": "\u00a7 17.28.270(F.2.a): one off-street parking space is required for each ADU.",
+        "conflict": "State law caps parking at one space per unit or per bedroom, whichever is less. A studio or efficiency unit with no bedroom likely cannot be required to provide a space.",
+        "citation": "state/hcd-adu-handbook.md, Gov. Code \u00a7 66314(d)(10)(A)",
+        "quote": "Parking requirements for ADUs shall not exceed one parking space per unit or bedroom, whichever is less"
       },
       {
-        "rule": "Submittal step: HOA approval if applicable, and evidence of HOA approval required for the City ADU prescreen.",
-        "conflict": "HCD says HOA review or approval cannot be part of the ministerial ADU process. Making it a precondition to processing likely violates state law. Fix: delete it and leave HOA matters to the applicant.",
-        "citation": "state/hcd-adu-handbook.md, HOAs (Gov. Code \u00a7 66315)",
-        "quote": "third party reviews by an HOA or their representatives or agents would violate State ADU Law."
+        "rule": "\u00a7 17.28.270(F.2.b): replacement parking is not required only when a 'garage, carport, or other covered parking structure' is demolished or converted.",
+        "conflict": "State law also covers uncovered off-street spaces. Omitting them could be read to allow replacement requirements for uncovered spaces.",
+        "citation": "state/hcd-adu-handbook.md, Gov. Code \u00a7 66314(d)(11)",
+        "quote": "may not require off-street parking spaces to be replaced when a garage, carport, covered parking structure, or uncovered parking space is demolished"
       },
       {
-        "rule": "City ADU prescreen requires evidence of Coastal approval before building permit processing (Coastal Commission approval required in the Coastal Zone).",
-        "conflict": "State law runs the coastal development permit review concurrently with the ADU review rather than requiring it first. Making it a prerequisite appears to conflict, subject to the Coastal Act and the LCP, which the loaded sources do not cover. Fix: process the two concurrently.",
-        "citation": "state/hcd-adu-handbook.md, Coastal Commission (Gov. Code \u00a7 66329)",
-        "quote": "The process to approve or deny a coastal development permit application shall happen concurrently with the process to approve or deny an application for an ADU"
-      },
-      {
-        "rule": "Quantity (single-family lot): one JADU plus one detached or attached ADU.",
-        "conflict": "State law requires allowing a converted ADU, a JADU, and a new detached ADU together on a single-family lot. The packet's one-ADU limit appears too restrictive.",
-        "citation": "state/hcd-adu-handbook.md, 66323 Units (Gov. Code \u00a7 66323(a))",
-        "quote": "on single-family lots, local agencies must allow at least one ADU constructed from existing space, one JADU, and one newly constructed detached ADU."
-      },
-      {
-        "rule": "Quantity (multifamily): up to two detached ADUs.",
-        "conflict": "On a lot with an existing multifamily dwelling, state law allows up to eight detached ADUs, capped at the number of existing units. Two is the number for a proposed multifamily dwelling.",
-        "citation": "state/hcd-adu-handbook.md, 66323 Units (Gov. Code \u00a7 66323(a)(4))",
-        "quote": "or up to eight detached ADUs are allowed on a lot with an existing multifamily dwelling, not to exceed the number of existing units on the lot."
-      },
-      {
-        "rule": "Front setback: no closer to the front line than the primary dwelling's living area (in addition to the zone front setback).",
-        "conflict": "Front setbacks cannot preclude an ADU of at least 800 sq ft, and \u00a7 66323 detached ADUs may sit in the front setback. This added build-line rule appears likely to violate that.",
-        "citation": "state/hcd-adu-handbook.md, Setbacks (Gov. Code \u00a7 66321(b)(3))",
-        "quote": "front yard setbacks cannot preclude an ADU of at least 800 square feet from being built on the property"
-      },
-      {
-        "rule": "Separation from primary building: 5 feet (including eaves).",
-        "conflict": "State law bars minimum-distance requirements that unreasonably restrict ADUs unless required by the Building or Fire Code. A flat 5-foot rule appears likely to conflict, especially for \u00a7 66323 units. Fix: defer to building and fire code separation.",
-        "citation": "state/hcd-adu-handbook.md, Setbacks (Gov. Code \u00a7 66314(d)(8))",
-        "quote": "Minimum distance or other requirements may not be applied if they would unreasonably restrict the creation of ADUs"
-      },
-      {
-        "rule": "Height limits list only 16 ft detached and 18 ft near transit (plus 2 ft for roof pitch).",
-        "conflict": "The packet omits the required 18-foot allowance for a detached ADU on a lot with an existing or proposed multifamily, multistory dwelling.",
-        "citation": "state/hcd-adu-handbook.md, Height Requirements (Gov. Code \u00a7 66321(b)(4)(C))",
-        "quote": "18 feet height on a lot with an existing or proposed multifamily, multistory dwelling"
-      },
-      {
-        "rule": "Parking: exemption only for a 'posted' car-share location within one block.",
-        "conflict": "State law exempts an ADU whenever a car share vehicle is located within one block. The added 'posted' condition narrows the exemption.",
-        "citation": "state/hcd-adu-handbook.md, Parking Requirements (Gov. Code \u00a7 66322(a))",
+        "rule": "\u00a7 17.28.270(F.2.c.v): the car-share parking exception applies only to a 'city-sanctioned, posted car-share pick-up or drop-off location' within one block.",
+        "conflict": "State law exempts the ADU whenever a car share vehicle is located within one block. The city's added 'sanctioned, posted' condition narrows the exemption.",
+        "citation": "state/hcd-adu-handbook.md, Gov. Code \u00a7 66322(a)",
         "quote": "When there is a car share vehicle located within one block of the ADU."
       },
       {
-        "rule": "Parking: one space per ADU.",
-        "conflict": "State law caps parking at one space per unit or per bedroom, whichever is less. A studio or efficiency unit with no bedroom likely cannot be required to provide a space. Fix: add the bedroom cap.",
-        "citation": "state/hcd-findings-dana-point-2025-08.md, New Findings 8 (Gov. Code \u00a7 66314(d)(10)(A))",
-        "quote": "Parking requirements for accessory dwelling units shall not exceed one parking space per accessory dwelling unit or per bedroom, whichever is less."
+        "rule": "\u00a7 17.28.270(F.3.c): a detached ADU must be at least five feet from the primary building.",
+        "conflict": "State law says minimum separation requirements may not be applied if they unreasonably restrict ADUs unless required by the Building or Fire Code. The five-foot rule has no 800-square-foot safeguard like the one in F.4.c.",
+        "citation": "state/hcd-adu-handbook.md, Gov. Code \u00a7 66314(d)(8)",
+        "quote": "Minimum distance or other requirements may not be applied if they would unreasonably restrict the creation of ADUs"
       },
       {
-        "rule": "Efficiency unit minimum: 220 sq ft plus 100 sq ft per occupant beyond two.",
-        "conflict": "The ordinance cannot set a minimum size that prohibits efficiency units, which may be as small as 150 sq ft. The 220 sq ft minimum appears too high.",
-        "citation": "state/hcd-adu-handbook.md, Size Requirements and Restrictions (HSC \u00a7 17958.1)",
-        "quote": "An efficiency unit may be as small as 150 square feet in floor area (HSC, \u00a7 17958.1)."
+        "rule": "\u00a7 17.28.270(F.3.d): no setback only if the ADU is in the same location and dimensions as an 'existing accessory building'.",
+        "conflict": "State law waives setbacks for ADUs created within an existing living area or accessory structure, or in a new structure in the same location and dimensions as any existing structure. The ordinance is narrower.",
+        "citation": "state/hcd-adu-handbook.md, Gov. Code \u00a7 66314(d)(7)",
+        "quote": "No setback shall be required for an ADU or JADU created within an existing living area or accessory structure"
       },
       {
-        "rule": "\u00a7 17.28.270 F.7 architecture: materials, colors, windows and doors must match the primary dwelling; roof slope must match; down-lights only; interior at least 10 ft wide; 7 ft walls.",
-        "conflict": "Standards must be objective, and 'match' is open to interpretation unless it is defined by measurable criteria. These design and size rules also cannot be applied to \u00a7 66323 units. A 10-ft minimum interior width may unreasonably restrict small units. Fix: use measurable criteria and exempt \u00a7 66323 units.",
-        "citation": "state/hcd-adu-handbook.md, Permit Applications (Gov. Code \u00a7 66313(i))",
-        "quote": "Subjective standards require independent judgement and are open to multiple interpretations."
+        "rule": "\u00a7 17.28.270(F.7.a): exterior materials and colors must 'match the appearance and architectural design' of the primary dwelling.",
+        "conflict": "Matching appearance and design appears to call for personal judgment. The Handbook lists similar 'architecture style' language as subjective, and only objective standards may be applied to ADUs.",
+        "citation": "state/hcd-adu-handbook.md, Gov. Code \u00a7 66313(i)",
+        "quote": "must maintain similar architecture style"
       },
       {
-        "rule": "Owner occupancy: JADU requires owner occupancy.",
-        "conflict": "State law requires owner occupancy only when the JADU shares sanitation facilities with the primary structure. Fix: limit the requirement to shared-sanitation JADUs.",
-        "citation": "state/hcd-adu-handbook.md, JADU Owner Occupancy (Gov. Code \u00a7 66333(b))",
-        "quote": "If the JADU does not have shared sanitation facilities, owner occupancy will not be required (Gov. Code, \u00a7 66333, subd. (b))."
+        "rule": "\u00a7 17.28.270(F.8): an ADU on or within 600 feet of a California Register property must not be visible from any public right-of-way.",
+        "conflict": "State law allows standards that prevent adverse impacts on listed properties. A flat no-visibility rule that reaches neighboring lots likely goes beyond that and may unreasonably restrict ADUs.",
+        "citation": "state/hcd-adu-handbook.md, Gov. Code \u00a7 66314(b)(1)",
+        "quote": "standards that prevent adverse impacts on any real property that is listed in the California Register of Historical Resources"
       },
       {
-        "rule": "Fees: \u00a7 17.28.270 D.4.a, no impact fee for ADUs 'under 750 sq ft'.",
-        "conflict": "State law bars impact fees for ADUs of 750 sq ft or less, so an ADU of exactly 750 sq ft is exempt. 'Under 750' appears to charge the 750 sq ft case.",
-        "citation": "state/hcd-adu-handbook.md, Fees (Gov. Code \u00a7 66311.5(c))",
-        "quote": "to prohibit impact fees on the development of an ADU that has 750 square feet of interior livable space or less"
+        "rule": "\u00a7 17.28.270(G.2): protects unpermitted ADUs only if built before January 1, 2018, and cites \u00a7 65852.2.",
+        "conflict": "The cutoff is now January 1, 2020 under \u00a7 66311.7, so ADUs built in 2018-2019 are likely left unprotected. The repealed section is also cited.",
+        "citation": "state/hcd-adu-handbook.md, Gov. Code \u00a7 66311.7(a)",
+        "quote": "Changes the date from January 1, 2018, to January 1, 2020"
       },
       {
-        "rule": "\u00a7 17.28.270 H: ADUs not meeting objective standards may be allowed with an Architectural Permit.",
-        "conflict": "This is likely acceptable only as an optional extra path. If it is used to deny or delay ADUs that fail local standards, it would be a discretionary process, which state law bars. Fix: state that it is optional and that state-mandated approvals are unconditional.",
-        "citation": "state/hcd-adu-handbook.md, HOAs (Gov. Code \u00a7 66315)",
-        "quote": "This approval process shall not include discretionary processes, provisions, or requirements except as provided in Government Code section"
-      },
-      {
-        "rule": "Review time: '60 days when a complete application is submitted.'",
-        "conflict": "The 60-day statement alone appears incomplete. State law also requires a written completeness determination within 15 business days, a list of any deficiencies, and an appeal process. The packet does not cover these (not covered by loaded sources).",
-        "citation": "state/hcd-adu-handbook.md, Permit Applications (Gov. Code \u00a7 66317(a)(2)(A))",
-        "quote": "provide written notice of the determination not later than 15 business days after the permitting agency received the application"
+        "rule": "\u00a7 17.28.270(H): an ADU that does not meet the objective standards may be allowed through a discretionary Architectural Permit.",
+        "conflict": "State law requires a ministerial-only approval process for ADU applications. Sending applicants into a discretionary architectural review appears inconsistent, even if framed as optional.",
+        "citation": "state/hcd-adu-handbook.md, Gov. Code \u00a7 66315 / \u00a7 66317",
+        "quote": "Local agencies must provide an approval process that only includes ministerial provisions for the approval of ADU permit applications."
       }
     ]
   },
@@ -117,44 +105,44 @@
       {
         "finding_number": 1,
         "finding": "Cites deleted sections 65852.2/65852.22/65852.26",
-        "caught": false,
-        "matched_issue": ""
+        "caught": true,
+        "matched_issue": "\u00a7 17.28.270(A) (also D.1.a.iv, E.5, E.8.a, G.2.a.ii): cites \u00a7\u00a7 65852.2, 65852.22, 65852.26 which were renumbered; should cite 66310-66342"
       },
       {
         "finding_number": 2,
         "finding": "One ADU + one JADU only; must allow any combination on single-family lot",
-        "caught": true,
-        "matched_issue": "Quantity (single-family lot): one JADU plus one detached or attached ADU.: State law requires allowing a converted ADU, a JADU, and a new detached ADU together on a single-family lot."
+        "caught": false,
+        "matched_issue": ""
       },
       {
         "finding_number": 3,
         "finding": "Max 2 detached ADUs on multifamily lot; state allows up to 8",
         "caught": true,
-        "matched_issue": "Quantity (multifamily): up to two detached ADUs.: state law allows up to eight detached ADUs, capped at number of existing units."
+        "matched_issue": "\u00a7 17.28.270(D.1.d): two detached ADU cap on existing multifamily lots conflicts with up to eight"
       },
       {
         "finding_number": 4,
-        "finding": "Detached ADU height capped at 16 ft; 18 ft allowed near transit and for multistory multifamily",
-        "caught": true,
-        "matched_issue": "Height limits list only 16 ft detached and 18 ft near transit: omits the 18-foot allowance for lot with multifamily, multistory dwelling."
+        "finding": "Detached ADU height capped at 16 ft",
+        "caught": false,
+        "matched_issue": ""
       },
       {
         "finding_number": 5,
-        "finding": "Owner occupancy required for ADUs built after Jan 1, 2025",
+        "finding": "Owner occupancy required for ADUs after Jan 1, 2025",
         "caught": true,
-        "matched_issue": "\u00a7 17.28.270 E.7.b: ADUs permitted on or after Jan 1, 2025 are subject to owner occupancy.: State law bars owner-occupancy requirements for ADUs."
+        "matched_issue": "\u00a7 17.28.270(E.7.b): owner-occupancy requirement for ADUs permitted on or after Jan. 1, 2025"
       },
       {
         "finding_number": 6,
-        "finding": "Recorded deed restriction for ADUs not allowed",
+        "finding": "Recorded deed restriction for ADUs and JADUs",
         "caught": true,
-        "matched_issue": "Deed restriction on ADUs recorded before a building permit issues and running with the land: HCD says a local agency likely cannot impose a deed restriction on an ADU."
+        "matched_issue": "\u00a7 17.28.270(E.8): requires recorded deed restriction for every ADU and JADU"
       },
       {
         "finding_number": 7,
-        "finding": "Parking waiver only for 'city-sanctioned, posted' car share within one block",
+        "finding": "Car share parking exemption only if city-sanctioned, posted",
         "caught": true,
-        "matched_issue": "Parking: exemption only for a 'posted' car-share location within one block.: The added 'posted' condition narrows the exemption."
+        "matched_issue": "\u00a7 17.28.270(F.2.c.v): car-share exception limited to 'city-sanctioned, posted' location"
       },
       {
         "finding_number": 8,
@@ -164,30 +152,28 @@
       },
       {
         "finding_number": 9,
-        "finding": "Materials, colors, windows must 'match' primary dwelling; subjective standard",
+        "finding": "Materials, colors, windows must 'match' primary dwelling (subjective)",
         "caught": true,
-        "matched_issue": "\u00a7 17.28.270 F.7 architecture: materials, colors, windows and doors must match the primary dwelling: Standards must be objective, and 'match' is open to interpretation."
+        "matched_issue": "\u00a7 17.28.270(F.7.a): materials and colors must 'match the appearance and architectural design'; subjective"
       },
       {
         "finding_number": 10,
-        "finding": "Unpermitted-unit pathway only for units before 2018; must cover before 2020",
-        "caught": false,
-        "matched_issue": ""
+        "finding": "Unpermitted-unit pathway only for units before 2018; must be 2020",
+        "caught": true,
+        "matched_issue": "\u00a7 17.28.270(G.2): protects unpermitted ADUs only if built before Jan 1, 2018; cutoff is 2020"
       }
     ],
     "extra_issues": [
-      "Ownership: ADU/JADU may not be sold separately (\u00a7 66341 exception)",
-      "HOA approval required as submittal step",
-      "Coastal approval required before building permit processing",
-      "Front setback no closer than primary dwelling's living area",
-      "5-foot separation from primary building",
-      "Parking: one space per ADU, needs bedroom cap",
-      "Efficiency unit minimum 220 sq ft too high",
-      "JADU owner occupancy required beyond shared-sanitation case",
-      "Fees: no impact fee for ADUs 'under 750 sq ft' should be 750 or less",
-      "Architectural Permit path for ADUs not meeting objective standards could be discretionary",
-      "Review time: missing completeness determination within 15 business days, deficiency list, appeal process"
+      "\u00a7 17.28.270(D.4.a.i): impact fee exemption only for ADU less than 750 sq ft; JADU exemption silent",
+      "\u00a7 17.28.270(D.4.a.ii): impact fees apply at 750 sq ft or larger",
+      "\u00a7 17.28.270(E.7.c): JADU owner occupancy for all JADUs",
+      "\u00a7 17.28.270(F.2.a): one parking space per ADU regardless of bedrooms",
+      "\u00a7 17.28.270(F.2.b): replacement parking exemption omits uncovered spaces",
+      "\u00a7 17.28.270(F.3.c): five-foot separation from primary building",
+      "\u00a7 17.28.270(F.3.d): no setback only for existing accessory building same location/dimensions",
+      "\u00a7 17.28.270(F.8): California Register property 600 feet no-visibility rule",
+      "\u00a7 17.28.270(H): discretionary Architectural Permit path"
     ]
   },
-  "input": "`san-clemente-adu-info-packet-2024-08.md` (city's rule summary; full ordinance text not loaded yet)"
+  "input": "`san-clemente-muni-code-17-28-270.md` (full ordinance)"
 }
