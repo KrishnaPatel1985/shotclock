@@ -6,6 +6,7 @@ Every finding must cite a loaded source in docs/. Not legal advice.
 """
 from __future__ import annotations
 
+import json
 import os
 from datetime import date
 from pathlib import Path
@@ -20,6 +21,17 @@ from deadlines import shot_clock
 ROOT = Path(__file__).parent
 DOCS = ROOT / "docs"
 DEMO = ROOT / "demo"
+
+# Backtest: review San Clemente's rules blind, then compare with HCD's 10 real findings.
+ORDINANCE_FILE = DOCS / "city" / "san-clemente-muni-code-17-28-270.md"
+PACKET_FILE = DOCS / "city" / "san-clemente-adu-info-packet-2024-08.md"
+HCD_SC_SUMMARY = DOCS / "state" / "hcd-findings-san-clemente-2025-10.md"
+BACKTEST_HIDE = ("hcd-findings-san-clemente-2025-10.md", "hcd-findings-san-clemente-2025-10-fulltext.md",
+                 PACKET_FILE.name, ORDINANCE_FILE.name)  # the answer key + the input itself
+BACKTEST_SAVED = ROOT / "backtest" / "last-result.json"
+GRADER_RULES = ("You grade a backtest strictly. A finding counts as caught only if a checker issue names the same "
+                "city rule (or clearly the same requirement) AND the same legal problem. Related but different "
+                "issues do not count. Do not give partial credit.")
 
 DISCLAIMER = ("Not legal advice. Results say \"likely\" because they are an automated reading of the loaded "
               "sources. Confirm with the city or an attorney before acting.")
@@ -122,17 +134,45 @@ class LetterResult(BaseModel):
     draft_reply: str = Field(description="Polite reply letter to the city, citing statutes for conflicts")
 
 
-def ask_claude(task: str, output_model: type[BaseModel], exclude: tuple[str, ...] = ()):
+class BacktestIssue(BaseModel):
+    rule: str = Field(description="The ordinance provision, e.g. § 17.28.270(E)(2)(a), and what it says")
+    conflict: str = Field(description="Why it likely conflicts with state ADU law")
+    citation: str
+    quote: str = Field(description="Short exact quote from a loaded state source")
+
+
+class BacktestResult(BaseModel):
+    summary: str
+    issues: list[BacktestIssue]
+
+
+class FindingMatch(BaseModel):
+    finding_number: int
+    finding: str = Field(description="HCD's finding in a few words")
+    caught: bool
+    matched_issue: str = Field(description="The checker issue that matches it, or empty")
+
+
+class BacktestGrade(BaseModel):
+    matches: list[FindingMatch]
+    extra_issues: list[str] = Field(description="Checker issues that match no HCD finding")
+
+
+def ask_claude(task: str, output_model: type[BaseModel], exclude: tuple[str, ...] = (),
+               system_override: str | None = None):
     client = get_client()
     if client is None:
         st.error("No API key. Add ANTHROPIC_API_KEY to .streamlit/secrets.toml (see secrets.toml.example).")
         return None
-    system = [
-        {"type": "text", "text": SYSTEM_RULES},
-        # Sources are identical across calls -> cache them so repeat checks are fast and cheap.
-        {"type": "text", "text": "LOADED SOURCES:\n\n" + sources_block(exclude),
-         "cache_control": {"type": "ephemeral"}},
-    ]
+    if system_override is not None:
+        system = system_override
+    else:
+        system = [
+            {"type": "text", "text": SYSTEM_RULES},
+            # Sources are identical across calls -> cache them so repeat checks are fast and cheap.
+            {"type": "text", "text": "LOADED SOURCES:\n\n" + sources_block(exclude),
+             "cache_control": {"type": "ephemeral"}},
+        ]
     try:
         resp = client.messages.parse(
             model=MODEL,
@@ -300,6 +340,60 @@ with tab2:
         st.download_button("Download reply (.md)",
                            report_md("Shotclock letter check", res2.summary, res2.items, "request",
                                      "## Draft reply\n\n" + reply), file_name="shotclock-reply.md")
+
+    # ----- Backtest -----
+    with st.expander("🧪 Backtest: would Shotclock have caught what the state caught?"):
+        st.markdown("In Oct 2025 HCD found **10 conflicts** between San Clemente's ADU ordinance and state law. "
+                    "Here Shotclock reviews the city's rules **with HCD's San Clemente letter hidden**, then we "
+                    "compare its list with HCD's 10 findings.")
+        if ORDINANCE_FILE.exists():
+            default_input, input_label = ORDINANCE_FILE.read_text(), f"`{ORDINANCE_FILE.name}` (full ordinance)"
+        elif PACKET_FILE.exists():
+            # Strip the packet's note that names HCD's findings, so the test stays blind.
+            default_input = "\n".join(l for l in PACKET_FILE.read_text().splitlines()
+                                      if "hcd" not in l.lower() and "conflict with state law" not in l)
+            input_label = f"`{PACKET_FILE.name}` (city's rule summary; full ordinance text not loaded yet)"
+        else:
+            default_input, input_label = "", "nothing loaded: paste the ordinance"
+        st.caption(f"Input: {input_label}. Hidden from the checker: " + ", ".join(f"`{h}`" for h in BACKTEST_HIDE))
+        ordinance = st.text_area("City ADU rules to review", default_input, height=200, key="ordinance")
+        b1, b2 = st.columns(2)
+        run_bt = b1.button("Run backtest (~1–2 min)", type="primary", key="run_bt")
+        if BACKTEST_SAVED.exists() and b2.button("Show last saved result", key="show_bt"):
+            st.session_state["bt"] = json.loads(BACKTEST_SAVED.read_text())
+        if run_bt and ordinance.strip():
+            with st.spinner("Step 1/2: reviewing the city's rules against state law (HCD letter hidden)…"):
+                review = ask_claude(
+                    "Review this city ADU ordinance against state ADU law. List every provision that likely "
+                    "conflicts with state law, one issue per provision.\n\n<ordinance>\n" + ordinance +
+                    "\n</ordinance>", BacktestResult, exclude=BACKTEST_HIDE)
+            grade = None
+            if review:
+                with st.spinner("Step 2/2: comparing with HCD's 10 findings…"):
+                    grade = ask_claude(
+                        "HCD's findings:\n<hcd>\n" + HCD_SC_SUMMARY.read_text() + "\n</hcd>\n\nChecker issues:\n"
+                        "<checker>\n" + "\n".join(f"- {i.rule}: {i.conflict}" for i in review.issues) +
+                        "\n</checker>\n\nFor each of HCD's numbered findings, say whether the checker caught it.",
+                        BacktestGrade, system_override=GRADER_RULES)
+            if review and grade:
+                st.session_state["bt"] = {"review": review.model_dump(), "grade": grade.model_dump(),
+                                          "input": input_label}
+                BACKTEST_SAVED.parent.mkdir(exist_ok=True)
+                BACKTEST_SAVED.write_text(json.dumps(st.session_state["bt"], indent=2))
+        bt = st.session_state.get("bt")
+        if bt:
+            matches = bt["grade"]["matches"]
+            n = sum(m["caught"] for m in matches)
+            st.success(f"### Shotclock found {n} of the {len(matches)} issues the state found")
+            st.caption(f"Input: {bt['input']}. HCD's San Clemente letter was hidden from the checker. The model "
+                       "may still have seen public reports in training, so treat this as a sanity check, not proof.")
+            for m in sorted(matches, key=lambda m: m["finding_number"]):
+                st.markdown(f"{'✅' if m['caught'] else '⬜'} **HCD #{m['finding_number']}:** {m['finding']}" +
+                            (f"  \n  ↳ *Shotclock:* {m['matched_issue']}" if m["caught"] else ""))
+            if bt["grade"]["extra_issues"]:
+                st.markdown("**Also flagged by Shotclock (not in HCD's letter):**")
+                for e in bt["grade"]["extra_issues"]:
+                    st.markdown(f"- {e}")
 
 st.divider()
 st.caption("Shotclock · Claude Impact Lab: UCI × Habitat OC · " + DISCLAIMER)
