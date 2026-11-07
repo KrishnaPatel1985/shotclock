@@ -255,15 +255,10 @@ STATUS_STYLE = {
 }
 ORDER = ["problem", "likely_conflicts", "missing", "unclear", "pass", "matches_law"]
 CITIES = ["San Clemente", "Dana Point", "Irvine", "Santa Ana", "Anaheim", "Other OC city"]
-APPLICANTS = {
-    "Habitat / nonprofit": "a Habitat for Humanity-style nonprofit building an ADU to sell at cost (0% markup) to a "
-                           "low-income family, possibly as a separate sale under Gov. Code § 66341. Prioritize what "
-                           "keeps the project on the 60-day ministerial path and keeps the affordable sale possible.",
-    "Homeowner": "a homeowner adding an ADU, likely a first-time applicant. Keep explanations plain.",
-    "Small builder": "a small builder submitting ADU permits in several cities.",
-    "City permit tech": "a city permit technician reviewing an application. Explain what the applicant must fix, and "
-                        "flag any city rule or form that may be out of date with state law.",
-}
+# Shotclock is tuned for Habitat-style nonprofits (the sponsor); this line goes into every check.
+APPLICANT = ("a Habitat for Humanity-style nonprofit building an ADU to sell at cost (0% markup) to a low-income "
+             "family, possibly as a separate sale under Gov. Code § 66341. Prioritize what keeps the project on the "
+             "60-day ministerial path and keeps the affordable sale possible.")
 
 CSS = """
 <style>
@@ -423,11 +418,9 @@ with hc[1].popover("About & sources", icon=":material/info:", width="stretch"):
     st.caption(f"Model `{MODEL}` · API key {'✅' if get_client() else '❌ missing'} · Python {sys.version.split()[0]}")
     st.caption(DISCLAIMER)
 
-sc = st.columns([1, 1, 2])
-applicant = sc[0].selectbox("Who's applying", list(APPLICANTS),
-                            help="Tailors the advice. Habitat / nonprofit focuses on the affordable for-sale path.")
-city = sc[1].selectbox("City", CITIES, help="The city whose rules apply. San Clemente has full city sources loaded.")
-WHO = f"Applicant: {APPLICANTS[applicant]}\n"
+sc = st.columns([1, 3])
+city = sc[0].selectbox("City", CITIES, help="The city whose rules apply. San Clemente has full city sources loaded.")
+WHO = f"Applicant: {APPLICANT}\n"
 
 tab1, tab2, tab3 = st.tabs(["Application Pre-Check", "City Letter Review", "Accuracy Test"])
 
