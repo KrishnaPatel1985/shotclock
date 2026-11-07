@@ -561,7 +561,7 @@ with tab1:
             else:
                 st.session_state.pop("fix", None)
                 st.session_state["pre_text"] = text
-                st.session_state.pop("corrected", None)  # keyed text area would keep the old run's text
+                st.session_state["fix_v"] = st.session_state.get("fix_v", 0) + 1  # fresh widget, no stale text
                 with st.spinner("Checking against state law and city rules… (about 30 seconds)"):
                     st.session_state["pre"] = ask_claude(
                         f"City: {city}\n{WHO}\nPre-check this ADU project BEFORE submission. List each relevant "
@@ -590,7 +590,7 @@ with tab1:
             if st.button("Draft the corrected application", type="primary", key="fix1", icon=":material/auto_fix_high:"):
                 flagged = "\n".join(f"- [{i.status}] {i.item}: {i.reason} Fix: {i.fix} ({i.citation})"
                                     for i in res.items if i.status != "pass")
-                st.session_state.pop("corrected", None)
+                st.session_state["fix_v"] = st.session_state.get("fix_v", 0) + 1
                 with st.spinner("Drafting the corrected application… (about a minute)"):
                     st.session_state["fix"] = ask_claude(
                         f"City: {city}\n{WHO}\nDraft the corrected version of this ADU application so it can be "
@@ -620,7 +620,7 @@ with tab1:
                     html_block("<ul class='sc-todo'>" + "".join(f"<li><span class='sc-box'></span>{h(t)}</li>" for t in fix.human_todo)
                                + "</ul>")
                 label("Corrected application · changes marked [CHANGE n] … [/CHANGE n] (edit before submitting)")
-                corrected = st.text_area("Corrected", fix.corrected_text, height=320, key="corrected",
+                corrected = st.text_area("Corrected", fix.corrected_text, height=320, key=f"corrected_{st.session_state.get('fix_v', 0)}",
                                          label_visibility="collapsed")
                 with st.expander("Cover note to the city", icon=":material/mail:"):
                     st.markdown(plain(fix.cover_note))
@@ -654,7 +654,8 @@ with tab2:
                 st.warning("Paste a letter first.")
             else:
                 clock_fact = f"\nShot clock (computed, not by you): {clock.summary()}\n" if clock else ""
-                st.session_state.pop("reply", None)  # keyed text area would keep the old run's text
+                # New widget key per run: the browser would otherwise restore the previous reply text.
+                st.session_state["let_v"] = st.session_state.get("let_v", 0) + 1
                 with st.spinner("Checking each request against state law… (about 30 seconds)"):
                     st.session_state["let"] = ask_claude(
                         f"City: {city}\n{WHO}{clock_fact}\nSplit this city comment letter into its individual requests. "
@@ -682,7 +683,8 @@ with tab2:
                 st.markdown(plain(res2.summary))
             render_rows(res2.items, "request")
             label("Draft reply to the city")
-            reply = st.text_area("Reply", res2.draft_reply, height=300, key="reply", label_visibility="collapsed")
+            reply = st.text_area("Reply", res2.draft_reply, height=300, key=f"reply_{st.session_state.get('let_v', 0)}",
+                                 label_visibility="collapsed")
             b1, b2 = st.columns(2)
             b1.download_button("Download reply", report_md("Shotclock letter check", res2.summary, res2.items,
                                "request", "## Draft reply\n\n" + reply), file_name="shotclock-reply.md",
