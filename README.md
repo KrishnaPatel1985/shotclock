@@ -114,7 +114,7 @@ Shot-clock self-test: `python3 deadlines.py`
 
 ## Team
 
-Krishna Patel and Lakshi, Claude Impact Lab at UC Irvine, November 2026.
+Krishna Patel and Lakshi VS, Claude Impact Lab at UC Irvine, November 2026.
 
 ## License
 
