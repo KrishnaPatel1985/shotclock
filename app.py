@@ -543,7 +543,8 @@ tab1, tab2, tab3 = st.tabs([":material/fact_check: Application Pre-Check", ":mat
 
 # ----- Tab 1: pre-check -----
 with tab1:
-    left, right = st.columns([5, 7], gap="large")
+    # Full-width input on top, results below (stacked, not side by side).
+    left, right = st.container(), st.container()
     with left:
         label("Your ADU project")
         if st.button("Use sample project", key="s1", icon=":material/description:"):
@@ -631,7 +632,8 @@ with tab1:
 
 # ----- Tab 2: city letter -----
 with tab2:
-    left, right = st.columns([5, 7], gap="large")
+    # Full-width input on top, results below (stacked, not side by side).
+    left, right = st.container(), st.container()
     with left:
         label("The city's comment letter")
         if st.button("Use sample letter", key="s2", icon=":material/mail:"):
