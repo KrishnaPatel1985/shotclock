@@ -15,7 +15,7 @@ from typing import Literal
 
 import anthropic
 import streamlit as st
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from deadlines import shot_clock
 
@@ -203,15 +203,29 @@ def ask_claude(task: str, output_model: type[BaseModel], exclude: tuple[str, ...
             {"type": "text", "text": "LOADED SOURCES:\n\n" + sources_block(exclude),
              "cache_control": {"type": "ephemeral"}},
         ]
+    # Attempt 1 as requested. If the JSON reply is cut off or malformed (the SDK raises ValidationError while
+    # parsing, before we can check stop_reason), retry once with low effort (less thinking, more room for the
+    # answer) and the most tokens a non-streaming call allows.
+    attempts = [(effort, max_tokens), ("low", max(max_tokens, 21000))]
     try:
-        resp = client.messages.parse(
-            model=MODEL,
-            max_tokens=max_tokens,
-            system=system,
-            **({"output_config": {"effort": effort}} if effort else {}),
-            messages=[{"role": "user", "content": task}],
-            output_format=output_model,
-        )
+        for i, (eff, mt) in enumerate(attempts):
+            try:
+                resp = client.messages.parse(
+                    model=MODEL,
+                    max_tokens=mt,
+                    system=system,
+                    **({"output_config": {"effort": eff}} if eff else {}),
+                    messages=[{"role": "user", "content": task}],
+                    output_format=output_model,
+                )
+                if resp.stop_reason == "max_tokens" and i == 0:
+                    continue
+                break
+            except (ValidationError, ValueError):
+                if i == len(attempts) - 1:
+                    st.error("Claude's answer was cut off or malformed twice. Please click the button again, "
+                             "or shorten the input.")
+                    return None
     except anthropic.AuthenticationError:
         st.error("The API key was rejected. Check ANTHROPIC_API_KEY.")
         return None
