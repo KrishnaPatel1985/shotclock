@@ -121,6 +121,23 @@ class PrecheckResult(BaseModel):
     items: list[PrecheckItem]
 
 
+class Correction(BaseModel):
+    item: str = Field(description="Short title, at most 6 words")
+    before: str = Field(description="Exact wording in the application now, or '(not in application)'")
+    after: str = Field(description="Exact replacement wording or text to add; use [CONFIRM: ...] for unknown facts")
+    why: str = Field(description="One sentence")
+    citation: str
+
+
+class CorrectedApplication(BaseModel):
+    corrections: list[Correction]
+    corrected_text: str = Field(description="Full revised application / project description with all corrections "
+                                            "applied, ready to edit and resubmit")
+    human_todo: list[str] = Field(description="Things only a person can produce: drawings, reports, signatures, "
+                                              "fees, confirmations")
+    cover_note: str = Field(description="Short note to the city listing what changed in this resubmittal")
+
+
 class LetterItem(BaseModel):
     request: str = Field(description="Short title of the city's request, at most 8 words, e.g. 'Owner-occupancy covenant'")
     status: Literal["matches_law", "likely_conflicts", "unclear"]
@@ -161,7 +178,7 @@ class BacktestGrade(BaseModel):
 
 
 def ask_claude(task: str, output_model: type[BaseModel], exclude: tuple[str, ...] = (),
-               system_override: str | None = None):
+               system_override: str | None = None, effort: str | None = None, max_tokens: int = 16000):
     client = get_client()
     if client is None:
         st.error("No API key. Add ANTHROPIC_API_KEY to .streamlit/secrets.toml (see secrets.toml.example).")
@@ -178,8 +195,9 @@ def ask_claude(task: str, output_model: type[BaseModel], exclude: tuple[str, ...
     try:
         resp = client.messages.parse(
             model=MODEL,
-            max_tokens=16000,
+            max_tokens=max_tokens,
             system=system,
+            **({"output_config": {"effort": effort}} if effort else {}),
             messages=[{"role": "user", "content": task}],
             output_format=output_model,
         )
@@ -212,6 +230,15 @@ STATUS_STYLE = {
 }
 ORDER = ["problem", "likely_conflicts", "missing", "unclear", "pass", "matches_law"]
 CITIES = ["San Clemente", "Dana Point", "Irvine", "Santa Ana", "Anaheim", "Other OC city"]
+APPLICANTS = {
+    "Habitat / nonprofit": "a Habitat for Humanity-style nonprofit building an ADU to sell at cost (0% markup) to a "
+                           "low-income family, possibly as a separate sale under Gov. Code § 66341. Prioritize what "
+                           "keeps the project on the 60-day ministerial path and keeps the affordable sale possible.",
+    "Homeowner": "a homeowner adding an ADU, likely a first-time applicant. Keep explanations plain.",
+    "Small builder": "a small builder submitting ADU permits in several cities.",
+    "City permit tech": "a city permit technician reviewing an application. Explain what the applicant must fix, and "
+                        "flag any city rule or form that may be out of date with state law.",
+}
 
 CSS = """
 <style>
@@ -263,9 +290,18 @@ html, body, .stMarkdown, .stButton button, .stDownloadButton button, textarea, i
 [data-testid="stExpander"] details{border-radius:12px;border:1px solid var(--line);background:#fff;}
 [data-testid="stExpander"] summary p{font-weight:600;font-size:.97rem;}
 [data-testid="stTabs"] [role="tab"] p{font-weight:700;font-size:1rem;}
+.sc-change{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:.5rem 0;background:#fff;}
+.sc-change .t{font-weight:700;margin-bottom:8px;color:var(--ink);}
+.sc-ba{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;}
+.sc-before{background:#FEF2F2;border-radius:8px;padding:8px 10px;font-size:.88rem;color:#7F1D1D;}
+.sc-after{background:#F0FDF4;border-radius:8px;padding:8px 10px;font-size:.88rem;color:#14532D;font-weight:500;}
+.sc-arrow{align-self:center;color:var(--orange);font-weight:800;font-size:1.2rem;}
+.sc-why{color:var(--muted);font-size:.85rem;margin-top:8px;}
+.sc-todo{list-style:none;padding-left:0;margin:.2rem 0 1rem;} .sc-todo li{padding:3px 0;color:#374151;}
 .sc-foot{color:#9CA3AF;font-size:.78rem;text-align:center;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);}
 @media (max-width:700px){.sc-stats{grid-template-columns:1fr;}.sc-dots{grid-template-columns:repeat(5,1fr);}
-  .sc-hero h1{font-size:1.75rem;}.sc-clock .big{font-size:2.4rem;}}
+  .sc-hero h1{font-size:1.75rem;}.sc-clock .big{font-size:2.4rem;}
+  .sc-ba{grid-template-columns:1fr;}.sc-arrow{display:none;}}
 </style>
 """
 
@@ -343,16 +379,19 @@ st.set_page_config(page_title="Shotclock · ADU fast-path checker", page_icon="�
 html_block(CSS)
 
 # Header: brand · city · sources · about
-hc = st.columns([5, 2.2, 1.3, 1.1], vertical_alignment="center")
+hc = st.columns([3.6, 2.2, 2, 1.3, 1.1], vertical_alignment="center")
 hc[0].markdown('<div class="sc-brand">⏱ SHOT<span>CLOCK</span></div>', unsafe_allow_html=True)
-city = hc[1].selectbox("City", CITIES, label_visibility="collapsed")
-with hc[2].popover("Sources", width="stretch"):
+applicant = hc[1].selectbox("Who's applying", list(APPLICANTS), label_visibility="collapsed",
+                            help="Tailors the advice. Habitat / nonprofit focuses on the affordable for-sale path.")
+city = hc[2].selectbox("City", CITIES, label_visibility="collapsed")
+WHO = f"Applicant: {APPLICANTS[applicant]}\n"
+with hc[3].popover("Sources", width="stretch"):
     st.markdown("**Loaded sources.** Every flag quotes one of these.")
     for kind in ("state", "city"):
         for name, text in load_sources(kind):
             st.caption(f"`{kind}/{name}` · {len(text) // 1000}k chars")
     st.caption(f"Model `{MODEL}` · API key {'✅' if get_client() else '❌ missing'}")
-with hc[3].popover("About", width="stretch"):
+with hc[4].popover("About", width="stretch"):
     st.markdown("**Shotclock** checks ADU permits against California law, so the 60-day fast path becomes "
                 "the normal path. Built at the Claude Impact Lab (UCI × Habitat OC), Lane 02 *Clear it*.")
     st.caption(DISCLAIMER)
@@ -388,9 +427,11 @@ with tab1:
             if not text:
                 st.warning("Describe the project or upload a file first.")
             else:
+                st.session_state.pop("fix", None)
+                st.session_state["pre_text"] = text
                 with st.spinner("Checking against state law and city rules… (about a minute)"):
                     st.session_state["pre"] = ask_claude(
-                        f"City: {city}\n\nPre-check this ADU project BEFORE submission. List each relevant "
+                        f"City: {city}\n{WHO}\nPre-check this ADU project BEFORE submission. List each relevant "
                         f"requirement as pass / missing (document or info not provided) / problem (conflicts "
                         f"with a rule). Give a concrete fix for each non-pass item.\n\n<project>\n{text}\n</project>",
                         PrecheckResult)
@@ -406,6 +447,52 @@ with tab1:
             render_rows(res.items, "item", "fix")
             st.download_button("Download fix list", report_md("Shotclock pre-check", res.summary, res.items, "item"),
                                file_name="shotclock-precheck.md", icon=":material/download:")
+
+            # ----- Fix it for me: draft the corrected application -----
+            html_block('<div class="sc-headline" style="margin-top:1.4rem">Fix it for me</div>')
+            st.caption("Claude drafts the corrected application: every change before → after, with the law behind "
+                       "it. Anything only a person can do (drawings, reports, signatures) is listed separately.")
+            if st.button("Draft the corrected application", type="primary", key="fix1", icon=":material/auto_fix_high:"):
+                flagged = "\n".join(f"- [{i.status}] {i.item}: {i.reason} Fix: {i.fix} ({i.citation})"
+                                    for i in res.items if i.status != "pass")
+                with st.spinner("Drafting the corrected application… (about a minute)"):
+                    st.session_state["fix"] = ask_claude(
+                        f"City: {city}\n{WHO}\nDraft the corrected version of this ADU application so it can be "
+                        f"submitted without a correction round. Use the pre-check findings below. For each problem "
+                        f"or missing item give 'before' (exact wording from the application, or '(not in "
+                        f"application)') and 'after' (the exact replacement wording or text to add, with the "
+                        f"specific numbers the law sets). Never invent facts about the property: use a bracketed "
+                        f"placeholder like [CONFIRM: walking distance to the transit stop]. Put drawings, reports, "
+                        f"signatures and fees in human_todo. Then write corrected_text (the full revised "
+                        f"application) and a short cover_note to the city listing what changed.\n\n"
+                        f"<application>\n{st.session_state.get('pre_text', '')}\n</application>\n\n"
+                        f"<precheck_findings>\n{flagged}\n</precheck_findings>",
+                        CorrectedApplication, effort="medium", max_tokens=20000)
+            fix = st.session_state.get("fix")
+            if fix:
+                score_chips([("r", len(fix.corrections), "changes"), ("a", len(fix.human_todo), "for a person")])
+                for c in fix.corrections:
+                    html_block(f'<div class="sc-change"><div class="t">{h(c.item)}</div><div class="sc-ba">'
+                               f'<div class="sc-before">{h(c.before)}</div><div class="sc-arrow">→</div>'
+                               f'<div class="sc-after">{h(c.after)}</div></div>'
+                               f'<div class="sc-why">{h(c.why)} <span class="sc-cite">{h(c.citation)}</span></div>'
+                               f'</div>')
+                if fix.human_todo:
+                    label("Still needs a person")
+                    html_block("<ul class='sc-todo'>" + "".join(f"<li>☐ {h(t)}</li>" for t in fix.human_todo)
+                               + "</ul>")
+                label("Corrected application (edit before submitting)")
+                corrected = st.text_area("Corrected", fix.corrected_text, height=320, key="corrected",
+                                         label_visibility="collapsed")
+                with st.expander("Cover note to the city", icon=":material/mail:"):
+                    st.write(fix.cover_note)
+                package = "\n".join(
+                    ["# Corrected ADU application (draft by Shotclock)", "", corrected, "", "## Changes made", ""]
+                    + [f"- **{c.item}**: {c.before} → {c.after} ({c.citation})" for c in fix.corrections]
+                    + ["", "## Still needs a person", ""] + [f"- [ ] {t}" for t in fix.human_todo]
+                    + ["", "## Cover note to the city", "", fix.cover_note, "", "---", DISCLAIMER])
+                st.download_button("Download corrected application", package, file_name="shotclock-corrected.md",
+                                   type="primary", icon=":material/download:")
 
 # ----- Tab 2: city letter -----
 with tab2:
@@ -431,7 +518,7 @@ with tab2:
                 clock_fact = f"\nShot clock (computed, not by you): {clock.summary()}\n" if clock else ""
                 with st.spinner("Checking each request against state law… (about a minute)"):
                     st.session_state["let"] = ask_claude(
-                        f"City: {city}\n{clock_fact}\nSplit this city comment letter into its individual requests. "
+                        f"City: {city}\n{WHO}{clock_fact}\nSplit this city comment letter into its individual requests. "
                         f"For each, decide: matches_law (the city may ask this), likely_conflicts (state ADU law "
                         f"appears to prohibit it), or unclear (not covered by loaded sources). Then draft a short, "
                         f"polite reply from the applicant: agree to the lawful items, ask the city to withdraw the "
