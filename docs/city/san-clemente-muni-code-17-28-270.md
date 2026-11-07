@@ -5,10 +5,7 @@ Source (official): https://www.sanclemente.gov/DocumentCenter/View/694/ADU-Appli
 Live code (blocks scripts; open in a browser): https://library.municode.com/ca/san_clemente/codes/code_of_ordinances?nodeId=TIT17ZO_CH17.28SPUS
 Checked: 2026-11-07. Text extracted from the official PDF with pdftotext; page numbers and footers removed, wording unchanged.
 
-Why this version: HCD's Oct 14, 2025 letter reviewed "ADU Ordinance No. 1742, adopted December 20, 2022". Every passage
-HCD quotes from the ordinance appears verbatim below. (The city's separate "ADU Standards" PDF, DocumentCenter/View/692,
-is an older 2021 version and does not match HCD's quote of subsection D.1.a, so it is not used.)
-Note: the city may have amended § 17.28.270 after HCD's letter; check the live code before citing this as current law.
+Note: the city may have amended § 17.28.270 since; check the live code before citing this as current law.
 
 ---
 
