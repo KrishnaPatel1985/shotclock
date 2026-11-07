@@ -77,6 +77,9 @@ Hard rules:
 - Never invent statute numbers. Current state ADU law is Gov. Code §§ 66310-66342; § 65852.2 was repealed
   by SB 477 and must not be cited as current.
 - Use cautious words ("likely", "appears to"). You are not giving legal advice.
+- Deadlines: say only what the sources state. § 66317(a)(3) requires the agency to approve or deny within 60 days.
+  Do NOT say an ordinary ADU application is "deemed approved" unless a loaded source states that rule for it (the
+  loaded Handbook states "deemed approved" only for coastal development permits, § 66329(b)(5)).
 - Be concise and practical: each reason and fix is one or two plain-English sentences."""
 
 
@@ -281,8 +284,9 @@ with tab2:
                     f"For each, decide: matches_law (the city may ask this), likely_conflicts (state ADU law "
                     f"appears to prohibit it), or unclear (not covered by loaded sources). Then draft a short, "
                     f"polite reply from the applicant: agree to the lawful items, ask the city to withdraw the "
-                    f"conflicting ones citing the statute, and mention the 60-day decision deadline if it has "
-                    f"passed. Sign it [Applicant name].\n\n<letter>\n{letter}\n</letter>",
+                    f"conflicting ones citing the statute, and if the 60-day decision deadline has passed, note "
+                    f"that and ask the city to approve or deny promptly (do not claim it is deemed approved). "
+                    f"Sign it [Applicant name].\n\n<letter>\n{letter}\n</letter>",
                     LetterResult)
     res2 = st.session_state.get("let")
     if res2:

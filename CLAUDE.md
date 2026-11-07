@@ -10,9 +10,16 @@ You are helping a small team build **Shotclock**, an ADU fast-path checker, at t
 - ✅ **Real sources loaded:** `docs/state/hcd-adu-handbook.md` (HCD ADU Handbook, March 2026) and
   `docs/state/hcd-findings-dana-point-2025-08.md` (HCD Notice of Violation to Dana Point), both from official PDFs.
 - ✅ **Demo files:** `demo/sample-comment-letter.md` and `demo/sample-project.md` (labeled FICTIONAL).
-- ❌ **Not tested yet: the two Claude calls.** Needs an API key in `.streamlit/secrets.toml`.
-- ❌ **Missing sources:** the San Clemente HCD letter (the "10 conflicts" proof), San Clemente's ADU checklist,
-  Gov. Code statute text. See `docs/README.md`.
+- ✅ **Both tabs tested end to end with a real key.** Tab 2 on the sample letter: 5 of 8 requests 🔴, 2 🟢, 1 🟡.
+  Tab 1 on the sample project: 10 of 14 items flagged. Every quote spot-checked appears verbatim in the sources.
+  Each check takes ~40–60 s, so run it before going on stage.
+- ✅ **San Clemente sources loaded:** HCD findings (summary + full official letter text, 10 findings confirmed),
+  city ADU checklist (2023) and info packet (2024) summaries in `docs/city/`.
+- ✅ **Fixed:** the app no longer claims "deemed approved" for ordinary ADUs (no loaded source says so).
+- ❌ **Still missing:** Gov. Code statute text, full text of Muni. Code § 17.28.270 (for the backtest). The two
+  san-clemente.org links in `docs/city/` returned 404 to a script; open them in a browser to confirm.
+- 💡 Pitch angle to verify: the city packet says ADUs "may not be sold separately", which conflicts with AB 587
+  (§ 66341) for Habitat. HCD didn't flag it.
 - ⚠️ **Only one `app.py` goes in the repo.** If a teammate already has one, compare and pick one before pushing.
 
 ## The idea (plain words)
