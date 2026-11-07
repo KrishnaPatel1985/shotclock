@@ -1,6 +1,6 @@
 """Shot clock: the 60-day ADU decision deadline.
 
-Gov. Code § 66317(a): the permitting agency must approve or deny a completed ADU
+Gov. Code § 66317(a)(3): the permitting agency must approve or deny a completed ADU
 application within 60 days; if it has not, "the application shall be deemed approved."
 Plain date math, no AI. Shown as an estimate: completeness and tolling rules vary.
 """
@@ -23,7 +23,7 @@ class ShotClock:
     def summary(self) -> str:
         if self.overdue:
             return (f"Application complete {self.complete_date:%b %d, %Y}. The city had to approve or deny "
-                    f"by {self.due_date:%b %d, %Y}: {-self.days_left} days overdue. Under Gov. Code § 66317(a) the "
+                    f"by {self.due_date:%b %d, %Y}: {-self.days_left} days overdue. Under Gov. Code § 66317(a)(3) the "
                     f"application appears to be deemed approved.")
         return (f"Application complete {self.complete_date:%b %d, %Y}. The city must approve or deny "
                 f"by {self.due_date:%b %d, %Y}: {self.days_left} days left (Gov. Code § 66317(a)(3)).")

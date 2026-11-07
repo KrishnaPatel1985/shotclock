@@ -94,10 +94,10 @@ Hard rules:
 - Never invent statute numbers. Current state ADU law is Gov. Code §§ 66310-66342; § 65852.2 was repealed
   by SB 477 and must not be cited as current.
 - Use cautious words ("likely", "appears to"). You are not giving legal advice.
-- Deadlines: say only what the sources state. § 66317(a) (state/gov-code-66310-66342.md) requires the agency to
+- Deadlines: say only what the sources state. § 66317(a)(3) (state/gov-code-66310-66342.md) requires the agency to
   approve or deny a completed application within 60 days, and says that if it has not, "the application shall be
   deemed approved." When the shot clock shows the deadline has passed, you may say the application "appears to be
-  deemed approved under Gov. Code § 66317(a)", quoting the statute, and note that the 60 days are tolled if the
+  deemed approved under Gov. Code § 66317(a)(3)", quoting the statute, and note that the 60 days are tolled if the
   applicant requested a delay and only start once the application is complete.
 - Be concise and practical: each reason and fix is one or two plain-English sentences."""
 
@@ -366,7 +366,7 @@ def clock_card(clock):
     html_block(f'<div class="sc-clock"><div class="sc-label" style="color:#9CA3AF">Shot clock</div>'
                f'<div class="big {cls}">{big}</div><div class="sub">{h(sub)}</div>'
                f'<div class="sc-bar"><div class="{cls}" style="width:{pct}%"></div></div>'
-               f'<div class="law">Gov. Code § 66317(a) · complete {clock.complete_date:%b %d} · estimate; tolled if you asked for a delay</div></div>')
+               f'<div class="law">Gov. Code § 66317(a)(3) · complete {clock.complete_date:%b %d} · estimate; tolled if you asked for a delay</div></div>')
 
 
 def read_upload(f) -> str:
@@ -444,6 +444,7 @@ with tab1:
             else:
                 st.session_state.pop("fix", None)
                 st.session_state["pre_text"] = text
+                st.session_state.pop("corrected", None)  # keyed text area would keep the old run's text
                 with st.spinner("Checking against state law and city rules… (about a minute)"):
                     st.session_state["pre"] = ask_claude(
                         f"City: {city}\n{WHO}\nPre-check this ADU project BEFORE submission. List each relevant "
@@ -470,6 +471,7 @@ with tab1:
             if st.button("Draft the corrected application", type="primary", key="fix1", icon=":material/auto_fix_high:"):
                 flagged = "\n".join(f"- [{i.status}] {i.item}: {i.reason} Fix: {i.fix} ({i.citation})"
                                     for i in res.items if i.status != "pass")
+                st.session_state.pop("corrected", None)
                 with st.spinner("Drafting the corrected application… (about a minute)"):
                     st.session_state["fix"] = ask_claude(
                         f"City: {city}\n{WHO}\nDraft the corrected version of this ADU application so it can be "
@@ -531,6 +533,7 @@ with tab2:
                 st.warning("Paste a letter first.")
             else:
                 clock_fact = f"\nShot clock (computed, not by you): {clock.summary()}\n" if clock else ""
+                st.session_state.pop("reply", None)  # keyed text area would keep the old run's text
                 with st.spinner("Checking each request against state law… (about a minute)"):
                     st.session_state["let"] = ask_claude(
                         f"City: {city}\n{WHO}{clock_fact}\nSplit this city comment letter into its individual requests. "
@@ -538,7 +541,7 @@ with tab2:
                         f"appears to prohibit it), or unclear (not covered by loaded sources). Then draft a short, "
                         f"polite reply from the applicant: agree to the lawful items, ask the city to withdraw the "
                         f"conflicting ones citing the statute, and if the 60-day decision deadline has passed, note "
-                        f"that, quote § 66317(a) that the application appears to be deemed approved, and ask the city to confirm the approval in writing. "
+                        f"that, quote § 66317(a)(3) that the application appears to be deemed approved, and ask the city to confirm the approval in writing. "
                         f"Sign it [Applicant name].\n\n<letter>\n{letter}\n</letter>",
                         LetterResult)
         res2 = st.session_state.get("let")
