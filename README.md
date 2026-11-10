@@ -60,6 +60,22 @@ Needs Python 3.10+ and an Anthropic API key in `ANTHROPIC_API_KEY` (in `.streaml
 gitignored, or Streamlit Cloud Secrets). Optional `CLAUDE_MODEL` (default `claude-sonnet-5-5`). No keys in the repo.
 Self-test of the shot clock: `python3 deadlines.py`.
 
+### Web version (Next.js on Vercel)
+
+`web/` is the same tool as a Next.js site: Pre-Check with "Fix it for me", City Letter Review with the shot clock,
+the Accuracy Test result, and linked sources. Claude runs in Vercel serverless functions with the same prompts and
+sources as `app.py` (`web/scripts/sync-content.mjs` copies `docs/`, `demo/` and `backtest/` in at build time).
+
+Deploy: on vercel.com, **Add New → Project → Import** `KrishnaPatel1985/shotclock`, set **Root Directory** to `web`,
+add the environment variable `ANTHROPIC_API_KEY` (optional `CLAUDE_MODEL`), then **Deploy**.
+
+Run locally:
+
+```bash
+cd web && npm install
+ANTHROPIC_API_KEY=sk-ant-... npm run dev   # opens http://localhost:3000
+```
+
 ## Sources and assumptions
 
 | Item | Source or assumption | Date checked |
