@@ -25,7 +25,7 @@ deadline, and drafts a polite reply that cites the statutes.
 
 ## What we built
 
-**Live demo:** https://shotclock-adu.vercel.app (web version) · https://shotclock.streamlit.app (Streamlit)
+**Live demo:** https://shotclock-adu.vercel.app
 **Demo video:** uploaded on the hub (30 seconds)
 
 | Tab | What it does |
@@ -33,7 +33,7 @@ deadline, and drafts a polite reply that cites the statutes.
 | **Application Pre-Check** | Describe or upload a project. Each requirement is marked pass / missing / problem, with a fix and a quote from the law. **"Fix it for me"** drafts the corrected application (before → after) and lists what only a person can do. |
 | **City Letter Review** | Paste the city's letter. Each request is marked matches law / likely conflicts / unclear, with the statute, plus a **draft reply**. The **shot clock** counts the 60-day deadline; past it, Gov. Code § 66317(a)(3) says the application "shall be deemed approved". |
 | **Accuracy Test** | Reviews San Clemente's real ordinance with HCD's findings hidden, then compares with HCD's 10 findings. |
-| **Source watcher** | Re-downloads the official sources and flags any that changed, moved or disappeared. A person approves each update. |
+| **Source watcher** (Streamlit version) | Re-downloads the official sources and flags any that changed, moved or disappeared. A person approves each update. |
 
 Our twist: most tools only check the applicant. Shotclock also checks the **city**.
 
@@ -49,32 +49,34 @@ Our twist: most tools only check the applicant. Shotclock also checks the **city
 
 ## Try it
 
+The live site is **https://shotclock-adu.vercel.app** (the `web/` folder, Next.js on Vercel). It is the same tool as
+the original Streamlit app: the same prompts, sources and structured outputs (`web/scripts/sync-content.mjs` copies
+`docs/`, `demo/` and `backtest/` in at build time). Claude runs in Vercel serverless functions.
+
+Run it locally:
+
 ```bash
-git clone https://github.com/KrishnaPatel1985/shotclock.git && cd shotclock
+git clone https://github.com/KrishnaPatel1985/shotclock.git && cd shotclock/web
+npm install
+ANTHROPIC_API_KEY=sk-ant-... npm run dev   # opens http://localhost:3000
+```
+
+Deploy your own: on vercel.com, **Add New → Project → Import** this repo, set **Root Directory** to `web`, add the
+environment variable `ANTHROPIC_API_KEY` (optional `CLAUDE_MODEL`, default `claude-sonnet-5-5`), then **Deploy**.
+No keys in the repo.
+
+### Original hackathon version (Streamlit)
+
+`app.py` is the Streamlit app we built and demoed at the hackathon. It also has the live Accuracy Test run and the
+Source watcher page (`pages/`, `watcher/`). To run it:
+
+```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 cp .streamlit/secrets.toml.example .streamlit/secrets.toml   # then paste your Anthropic API key into it
 .venv/bin/streamlit run app.py                               # opens http://localhost:8501
 ```
 
-Needs Python 3.10+ and an Anthropic API key in `ANTHROPIC_API_KEY` (in `.streamlit/secrets.toml`, which is
-gitignored, or Streamlit Cloud Secrets). Optional `CLAUDE_MODEL` (default `claude-sonnet-5-5`). No keys in the repo.
-Self-test of the shot clock: `python3 deadlines.py`.
-
-### Web version (Next.js on Vercel)
-
-`web/` is the same tool as a Next.js site: Pre-Check with "Fix it for me", City Letter Review with the shot clock,
-the Accuracy Test result, and linked sources. Claude runs in Vercel serverless functions with the same prompts and
-sources as `app.py` (`web/scripts/sync-content.mjs` copies `docs/`, `demo/` and `backtest/` in at build time).
-
-Deploy: on vercel.com, **Add New → Project → Import** `KrishnaPatel1985/shotclock`, set **Root Directory** to `web`,
-add the environment variable `ANTHROPIC_API_KEY` (optional `CLAUDE_MODEL`), then **Deploy**.
-
-Run locally:
-
-```bash
-cd web && npm install
-ANTHROPIC_API_KEY=sk-ant-... npm run dev   # opens http://localhost:3000
-```
+Needs Python 3.10+. Self-test of the shot clock: `python3 deadlines.py`.
 
 ## Sources and assumptions
 
