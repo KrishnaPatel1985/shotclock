@@ -25,7 +25,7 @@ deadline, and drafts a polite reply that cites the statutes.
 
 ## What we built
 
-**Live demo:** https://shotclock.streamlit.app
+**Live demo:** https://shotclock-adu.vercel.app (web version) · https://shotclock.streamlit.app (Streamlit)
 **Demo video:** uploaded on the hub (30 seconds)
 
 | Tab | What it does |
